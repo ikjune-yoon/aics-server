@@ -1,4 +1,4 @@
-package kgu.developers.core.domain.post;
+package kgu.developers.core.domain.post.domain;
 
 import static jakarta.persistence.CascadeType.*;
 import static jakarta.persistence.EnumType.*;
@@ -46,11 +46,9 @@ public class Post extends BaseTimeEntity {
 	@Column(nullable = false)
 	private int views;
 
-	//TODO: category 확정 후 nullable = true로 변경
 	@Enumerated(STRING)
 	private Category category;
 
-	@Setter
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name = "user_id")
 	private User author;
@@ -62,17 +60,19 @@ public class Post extends BaseTimeEntity {
     /* TODO: 파일 엔티티 생성 후 연결 & create 메서드에 추가
     @OneToOne
     @JoinColumn(name = "file_id")
-    private File fileID;
+    private File attachment;
+
+    public boolean hasAttachment(){
+		return attachment != null;
+	}
     */
 
-	public static Post create(String title, String content) {
-		Post createPost = Post.builder()
+	public static Post create(String title, String content, User author) {
+		return Post.builder()
 			.title(title)
 			.content(content)
 			.views(0)
+			.author(author) // NOTE: User Setter 주입 방지 위해 생성자 주입
 			.build();
-
-		return createPost;
 	}
-
 }
