@@ -1,9 +1,8 @@
 package kgu.developers.api.post.application;
 
 import jakarta.transaction.Transactional;
-import kgu.developers.api.post.presentation.exception.PostNotFoundException;
-import kgu.developers.api.post.presentation.request.PostRequest;
-import kgu.developers.api.post.presentation.response.PostDetailResponse;
+
+import kgu.developers.api.post.presentation.request.PostCreateRequest;
 import kgu.developers.api.post.presentation.response.PostPersistResponse;
 import kgu.developers.api.post.presentation.response.PostSummaryPageResponse;
 import kgu.developers.api.user.application.UserService;
@@ -31,14 +30,9 @@ public class PostService {
 
 	@Transactional
 	public PostSummaryPageResponse getPostsByKeyword(PageRequest request, String keyword) {
-		try {
-			PaginatedListResponse<Post> paginatedListResponse = postRepository.findAllByTitleContainingOrderByCreatedAtDesc(
-				keyword, request);
-			return PostSummaryPageResponse.of(paginatedListResponse.contents(), paginatedListResponse.pageable());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
+		PaginatedListResponse<Post> paginatedListResponse = postRepository.findAllByTitleContainingOrderByCreatedAtDesc(
+			keyword, request);
+		return PostSummaryPageResponse.of(paginatedListResponse.contents(), paginatedListResponse.pageable());
 	}
 
 	@Transactional
