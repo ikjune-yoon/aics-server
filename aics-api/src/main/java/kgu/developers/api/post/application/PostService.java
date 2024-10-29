@@ -4,8 +4,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
-
-import kgu.developers.api.post.presentation.request.PostCreateRequest;
+import kgu.developers.api.post.presentation.exception.PostNotFoundException;
+import kgu.developers.api.post.presentation.request.PostRequest;
+import kgu.developers.api.post.presentation.response.PostDetailResponse;
 import kgu.developers.api.post.presentation.response.PostPersistResponse;
 import kgu.developers.api.post.presentation.response.PostSummaryPageResponse;
 import kgu.developers.api.user.application.UserService;
@@ -29,18 +30,10 @@ public class PostService {
 		return PostPersistResponse.from(createPost.getId());
 	}
 
-	@Transactional
 	public PostSummaryPageResponse getPostsByKeyword(PageRequest request, String keyword) {
 		PaginatedListResponse<Post> paginatedListResponse = postRepository.findAllByTitleContainingOrderByCreatedAtDesc(
 			keyword, request);
 		return PostSummaryPageResponse.of(paginatedListResponse.contents(), paginatedListResponse.pageable());
-	}
-
-	@Transactional
-	public Post getById(Long postId) {
-		return postRepository.findById(postId)
-			.filter(post -> post.getDeletedAt() == null)
-			.orElseThrow(PostNotFoundException::new);
 	}
 
 	@Transactional
@@ -53,7 +46,6 @@ public class PostService {
 	@Transactional
 	public void updatePost(Long postId, PostRequest request) {
 		Post updatePost = getById(postId);
-
 		updatePost.updateTitle(request.title());
 		updatePost.updateContent(request.content());
 	}
@@ -62,11 +54,17 @@ public class PostService {
 	public void togglePostPinStatus(Long postId) {
 		Post pinPost = getById(postId);
 		pinPost.togglePinned();
-  }
-  
-  @Transactional
+	}
+
+	@Transactional
 	public void deletePost(Long postId) {
 		Post deletePost = getById(postId);
 		deletePost.delete();
+	}
+
+	private Post getById(Long postId) {
+		return postRepository.findById(postId)
+			.filter(post -> post.getDeletedAt() == null)
+			.orElseThrow(PostNotFoundException::new);
 	}
 }
