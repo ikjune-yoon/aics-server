@@ -42,14 +42,17 @@ public class PostService {
 	}
 
 	@Transactional
-	public PostDetailResponse getPostById(Long postId) {
-		return PostDetailResponse.from(getById(postId));
+	public Post getById(Long postId) {
+		return postRepository.findById(postId)
+			.filter(post -> post.getDeletedAt() == null)
+			.orElseThrow(PostNotFoundException::new);
 	}
 
 	@Transactional
-	public Post getById(Long postId) {
-		return postRepository.findById(postId)
-			.orElseThrow(PostNotFoundException::new);
+	public PostDetailResponse getPostById(Long postId) {
+		Post post = getById(postId);
+		post.increaseViews();
+		return PostDetailResponse.from(post);
 	}
 
 	@Transactional
@@ -58,5 +61,11 @@ public class PostService {
 
 		updatePost.updateTitle(request.title());
 		updatePost.updateContent(request.content());
+	}
+
+	@Transactional
+	public void deletePost(Long postId) {
+		Post deletePost = getById(postId);
+		deletePost.delete();
 	}
 }
