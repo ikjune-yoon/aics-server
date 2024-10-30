@@ -1,12 +1,5 @@
 package kgu.developers.api.post.application;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
-import org.springframework.data.domain.PageRequest;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
 import jakarta.transaction.Transactional;
 import kgu.developers.api.post.presentation.exception.PostNotFoundException;
 import kgu.developers.api.post.presentation.request.PostRequest;
@@ -19,6 +12,12 @@ import kgu.developers.domain.post.domain.Post;
 import kgu.developers.domain.post.domain.PostRepository;
 import kgu.developers.domain.user.domain.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -85,7 +84,7 @@ public class PostService {
 		return "최근 삭제된 게시글 정리 시간: " + lastScheduledRun.format(formatter);
 	}
 
-	private Post getById(Long postId) {
+	public Post getById(Long postId) {
 		return postRepository.findById(postId)
 			.filter(post -> post.getDeletedAt() == null)
 			.orElseThrow(PostNotFoundException::new);
