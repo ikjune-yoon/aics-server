@@ -1,12 +1,14 @@
 package kgu.developers.api.comment.application;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import kgu.developers.api.comment.presentation.exception.CommentNotFoundException;
-import kgu.developers.api.comment.presentation.request.CommentListRequest;
 import kgu.developers.api.comment.presentation.request.CommentRequest;
 import kgu.developers.api.comment.presentation.response.CommentListResponse;
 import kgu.developers.api.comment.presentation.response.CommentPersistResponse;
@@ -23,6 +25,10 @@ public class CommentService {
 	private final PostService postService;
 	private final UserService userService;
 
+	public static final int COMMENT_RETENTION_DAYS = 60 * 60 * 24 * 30;
+
+	private LocalDateTime lastScheduledRun;
+
 	@Transactional
 	public CommentPersistResponse createComment(CommentRequest request) {
 		Comment createComment = Comment.create(
@@ -34,9 +40,8 @@ public class CommentService {
 		return CommentPersistResponse.of(id);
 	}
 
-	public CommentListResponse getComments(CommentListRequest request) {
-		List<Comment> comments = commentRepository.findAllByPostIdAndDeletedAtIsNull(request.postId());
-
+	public CommentListResponse getComments(Long postId) {
+		List<Comment> comments = commentRepository.findAllByPostIdAndDeletedAtIsNull(postId);
 		return CommentListResponse.from(comments);
 	}
 
@@ -46,9 +51,30 @@ public class CommentService {
 		comment.updateContent(commentRequest.content());
 	}
 
+	@Transactional
+	public void deleteComment(Long commentId) {
+		Comment comment = getById(commentId);
+		comment.delete();
+	}
+
 	private Comment getById(Long commentId) {
 		return commentRepository.findById(commentId)
 			.filter(comment -> comment.getDeletedAt() == null)
 			.orElseThrow(CommentNotFoundException::new);
+	}
+
+	@Scheduled(cron = "0 0 0 * * *")
+	@Transactional
+	public void cleanupOldDeletedComments() {
+		commentRepository.deleteAllByDeletedAtBefore(COMMENT_RETENTION_DAYS);
+		lastScheduledRun = LocalDateTime.now();
+	}
+
+	public String getFormattedLastCleanupRunTime() {
+		if (lastScheduledRun == null) {
+			return "아직 클린업 작업이 실행되지 않았습니다.";
+		}
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분 ss초");
+		return "최근 삭제된 댓글 정리 시간: " + lastScheduledRun.format(formatter);
 	}
 }

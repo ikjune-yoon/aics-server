@@ -1,6 +1,6 @@
 package kgu.developers.api.comment.presentation;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.CREATED;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,7 +21,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
 import kgu.developers.api.comment.application.CommentService;
-import kgu.developers.api.comment.presentation.request.CommentListRequest;
 import kgu.developers.api.comment.presentation.request.CommentRequest;
 import kgu.developers.api.comment.presentation.response.CommentListResponse;
 import kgu.developers.api.comment.presentation.response.CommentPersistResponse;
@@ -67,10 +68,29 @@ public class CommentController {
 	@ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = CommentListResponse.class)))
 	@GetMapping
 	public ResponseEntity<CommentListResponse> getComments(
-		@RequestBody CommentListRequest commentListRequest
+		@Parameter(description = "게시글의 ID", example = "19", required = true) @RequestParam @Positive Long postId
 	) {
-		CommentListResponse response = commentService.getComments(commentListRequest);
+		CommentListResponse response = commentService.getComments(postId);
 		return ResponseEntity.ok(response);
 	}
 
+	@Operation(summary = "댓글 삭제 API", description = """
+			- Description : 이 API는 해당 댓글을 삭제합니다.
+			- Assignee : 박민준
+		""")
+	@ApiResponse(responseCode = "204")
+	@PatchMapping("/{commentId}/delete")
+	public ResponseEntity<Void> deleteComment(
+		@Parameter(description = "삭제할 댓글의 ID", example = "19", required = true) @PathVariable @Positive Long commentId
+	) {
+		commentService.deleteComment(commentId);
+		return ResponseEntity.noContent().build();
+	}
+
+	@Hidden
+	@GetMapping("/cleanup-last-run")
+	public ResponseEntity<String> getLastCleanupRunTime() {
+		String response = commentService.getFormattedLastCleanupRunTime();
+		return ResponseEntity.ok(response);
+	}
 }
