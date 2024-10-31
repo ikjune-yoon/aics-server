@@ -1,11 +1,13 @@
 package kgu.developers.domain.comment.infrastructure;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Repository;
+
 import kgu.developers.domain.comment.domain.Comment;
 import kgu.developers.domain.comment.domain.CommentRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -20,5 +22,10 @@ public class CommentRepositoryImpl implements CommentRepository {
 	@Override
 	public Optional<Comment> findById(Long commentId) {
 		return jpaCommentRepository.findById(commentId);
+	}
+
+	@Override
+	public List<Comment> findAllByPostIdAndDeletedAtIsNull(Long postId) {
+		return jpaCommentRepository.findAllByPostIdAndDeletedAtIsNull(postId);
 	}
 }
