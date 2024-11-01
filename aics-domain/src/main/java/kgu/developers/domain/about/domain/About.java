@@ -1,10 +1,12 @@
-package kgu.developers.domain.file.domain;
+package kgu.developers.domain.about.domain;
 
+import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import kgu.developers.common.domain.BaseTimeEntity;
@@ -18,21 +20,22 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
-public class FileEntity extends BaseTimeEntity {
+public class About extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = IDENTITY)
 	private Long id;
 
 	@Column(nullable = false)
-	private String logicalName;
+	@Enumerated(STRING)
+	private MainCategory mainCategory;
 
-	@Column(nullable = false, unique = true)
-	private String physicalPath;
+	@Column(nullable = false)
+	@Enumerated(STRING)
+	private SubCategory subCategory;
 
-	public static FileEntity create(String logicalName, String physicalPath) {
-		return FileEntity.builder()
-			.logicalName(logicalName)
-			.physicalPath(physicalPath)
-			.build();
-	}
+	@Column(nullable = false)
+	private String detailCategory;
+
+	@Column(nullable = false, columnDefinition = "text")
+	private String content;
 }

@@ -1,7 +1,7 @@
 package kgu.developers.domain.post.infrastructure;
 
-import static kgu.developers.domain.comment.domain.QComment.*;
-import static kgu.developers.domain.post.domain.QPost.*;
+import static kgu.developers.domain.comment.domain.QComment.comment;
+import static kgu.developers.domain.post.domain.QPost.post;
 
 import java.time.LocalDateTime;
 import java.util.List;

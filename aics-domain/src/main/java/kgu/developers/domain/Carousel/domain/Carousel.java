@@ -1,4 +1,4 @@
-package kgu.developers.domain.file.domain;
+package kgu.developers.domain.Carousel.domain;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
@@ -7,7 +7,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import kgu.developers.common.domain.BaseTimeEntity;
+import kgu.developers.domain.file.domain.FileEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,21 +21,15 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
-public class FileEntity extends BaseTimeEntity {
+public class Carousel extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = IDENTITY)
 	private Long id;
 
-	@Column(nullable = false)
-	private String logicalName;
+	@Column(name = "\"order\"", nullable = false)
+	private Long order;
 
-	@Column(nullable = false, unique = true)
-	private String physicalPath;
-
-	public static FileEntity create(String logicalName, String physicalPath) {
-		return FileEntity.builder()
-			.logicalName(logicalName)
-			.physicalPath(physicalPath)
-			.build();
-	}
+	@OneToOne
+	@JoinColumn(name = "file_id", nullable = false)
+	private FileEntity file;
 }

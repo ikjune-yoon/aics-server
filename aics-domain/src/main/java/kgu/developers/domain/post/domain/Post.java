@@ -36,7 +36,6 @@ import lombok.NoArgsConstructor;
 public class Post extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = IDENTITY)
-	@Column(name = "post_id")
 	private Long id;
 
 	@Column(nullable = false, length = 100)
@@ -52,7 +51,7 @@ public class Post extends BaseTimeEntity {
 	private Category category;
 
 	@ManyToOne(fetch = EAGER)
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "author_id")
 	private User author;
 
 	@Column(nullable = false)

@@ -1,4 +1,4 @@
-package kgu.developers.domain.file.domain;
+package kgu.developers.domain.professor.domain;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
@@ -18,21 +18,23 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
-public class FileEntity extends BaseTimeEntity {
+public class Professor extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = IDENTITY)
 	private Long id;
 
-	@Column(nullable = false)
-	private String logicalName;
+	@Column(nullable = false, length = 10)
+	private String name;
 
-	@Column(nullable = false, unique = true)
-	private String physicalPath;
+	@Column(nullable = false, length = 10)
+	private String officeLoc;
 
-	public static FileEntity create(String logicalName, String physicalPath) {
-		return FileEntity.builder()
-			.logicalName(logicalName)
-			.physicalPath(physicalPath)
-			.build();
-	}
+	@Column(nullable = false, length = 15)
+	private String contact;
+
+	@Column(nullable = false, length = 50)
+	private String email;
+
+	@Column(nullable = false, length = 15)
+	private String course;
 }
