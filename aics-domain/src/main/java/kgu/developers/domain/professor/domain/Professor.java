@@ -29,12 +29,34 @@ public class Professor extends BaseTimeEntity {
 	@Column(nullable = false, length = 10)
 	private String officeLoc;
 
-	@Column(nullable = false, length = 15)
+	@Column(nullable = false, unique = true,length = 15)
 	private String contact;
 
-	@Column(nullable = false, length = 50)
+	@Column(nullable = false, unique = true, length = 50)
 	private String email;
 
 	@Column(nullable = false, length = 15)
 	private String course;
+
+//	@Column(name = "\"order\"", nullable = false)
+//	private Integer order;
+
+	public static Professor create(String name, String officeLoc, String contact, String email, String course) {
+		return Professor.builder()
+			.name(name)
+			.officeLoc(officeLoc)
+			.contact(contact)
+			.email(email)
+			.course(course)
+//			.order(0)
+			.build();
+	}
+
+	public void updateProfessor(String name, String officeLoc, String contact, String email, String course) {
+		this.name = name;
+		this.officeLoc = officeLoc;
+		this.contact = contact;
+		this.email = email;
+		this.course = course;
+	}
 }
