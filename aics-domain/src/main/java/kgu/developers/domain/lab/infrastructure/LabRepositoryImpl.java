@@ -25,13 +25,13 @@ public class LabRepositoryImpl implements LabRepository {
 	}
 
 	@Override
-	public List<Lab> findByDeletedAtIsNullOrderByNameAsc() {
-		return jpaLabRepository.findByDeletedAtIsNullOrderByNameAsc();
+	public List<Lab> findAllByOrderByName() {
+		return jpaLabRepository.findAllByOrderByName();
 	}
 
 	@Override
 	public void delete(Lab lab) {
 		jpaLabRepository.delete(lab);
 	}
-	
+
 }

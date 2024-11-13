@@ -22,18 +22,20 @@ public class LabService {
 	public LabPersistResponse createLab(LabRequest request) {
 		Lab lab = Lab.create(request.name(), request.loc(), request.site());
 		labRepository.save(lab);
+
 		return LabPersistResponse.of(lab.getId());
 	}
 
 	@Transactional(readOnly = true)
 	public LabListResponse getLabs() {
-		List<Lab> labs = labRepository.findByDeletedAtIsNullOrderByNameAsc();
+		List<Lab> labs = labRepository.findAllByOrderByName();
 		return LabListResponse.from(labs);
 	}
 
 	@Transactional
 	public void updateLab(Long id, LabRequest request) {
 		Lab lab = getById(id);
+
 		lab.updateName(request.name());
 		lab.updateLoc(request.loc());
 		lab.updateSite(request.site());
