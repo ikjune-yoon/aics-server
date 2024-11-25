@@ -2,6 +2,17 @@ package kgu.developers.api.post.presentation;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,17 +27,8 @@ import kgu.developers.api.post.presentation.request.PostRequest;
 import kgu.developers.api.post.presentation.response.PostDetailResponse;
 import kgu.developers.api.post.presentation.response.PostPersistResponse;
 import kgu.developers.api.post.presentation.response.PostSummaryPageResponse;
+import kgu.developers.domain.post.domain.Category;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -42,9 +44,10 @@ public class PostController {
 	@ApiResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = PostPersistResponse.class)))
 	@PostMapping
 	public ResponseEntity<PostPersistResponse> createPost(
+		@Parameter(description = "게시글 카테고리", example = "DEPT_INFO", required = true) @RequestParam Category category,
 		@RequestBody PostRequest request
 	) {
-		PostPersistResponse response = postService.createPost(request);
+		PostPersistResponse response = postService.createPost(request, category);
 		return ResponseEntity.status(CREATED).body(response);
 	}
 
@@ -54,12 +57,14 @@ public class PostController {
 		""")
 	@ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = PostSummaryPageResponse.class)))
 	@GetMapping
-	public ResponseEntity<PostSummaryPageResponse> getPostsByKeyword(
+	public ResponseEntity<PostSummaryPageResponse> getPostsByKeywordAndCategory(
+		@Parameter(description = "게시글 카테고리", example = "DEPT_INFO") @RequestParam(required = false) Category category,
 		@Parameter(description = "페이지 인덱스", example = "0", required = true) @RequestParam(defaultValue = "0") @PositiveOrZero int page,
 		@Parameter(description = "응답 개수", example = "10", required = true) @RequestParam(defaultValue = "10") @Positive int size,
 		@Parameter(description = "검색 키워드", example = "컴퓨터공학과") @RequestParam(required = false) String keyword
 	) {
-		PostSummaryPageResponse response = postService.getPostsByKeyword(PageRequest.of(page, size), keyword);
+		PostSummaryPageResponse response = postService.getPostsByKeywordAndCategory(PageRequest.of(page, size), keyword,
+			category);
 		return ResponseEntity.ok(response);
 	}
 
