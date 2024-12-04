@@ -2,19 +2,6 @@ package kgu.developers.api.comment.presentation;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
-import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.Positive;
-import kgu.developers.api.comment.application.CommentService;
-import kgu.developers.api.comment.presentation.request.CommentRequest;
-import kgu.developers.api.comment.presentation.response.CommentListResponse;
-import kgu.developers.api.comment.presentation.response.CommentPersistResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,6 +11,22 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import kgu.developers.api.comment.application.CommentService;
+import kgu.developers.api.comment.presentation.request.CommentRequest;
+import kgu.developers.api.comment.presentation.request.CommentUpdateRequest;
+import kgu.developers.api.comment.presentation.response.CommentListResponse;
+import kgu.developers.api.comment.presentation.response.CommentPersistResponse;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,7 +42,7 @@ public class CommentController {
 	@ApiResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = CommentPersistResponse.class)))
 	@PostMapping
 	public ResponseEntity<CommentPersistResponse> createComment(
-		@RequestBody CommentRequest commentRequest
+		@RequestBody @Valid CommentRequest commentRequest
 	) {
 		CommentPersistResponse response = commentService.createComment(commentRequest);
 		return ResponseEntity.status(CREATED).body(response);
@@ -52,10 +55,10 @@ public class CommentController {
 	@ApiResponse(responseCode = "204")
 	@PatchMapping("/{commentId}")
 	public ResponseEntity<Void> updateComment(
-		@Parameter(description = "수정할 게시글의 id", example = "1", required = true) @PathVariable @Positive Long commentId,
-		@RequestBody CommentRequest commentRequest
+		@Parameter(description = "수정할 댓글의 id", example = "1", required = true) @PathVariable @Positive Long commentId,
+		@RequestBody @Valid CommentUpdateRequest request
 	) {
-		commentService.updateComment(commentId, commentRequest);
+		commentService.updateComment(commentId, request);
 		return ResponseEntity.noContent().build();
 	}
 
