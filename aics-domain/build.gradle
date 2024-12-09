@@ -15,3 +15,13 @@ dependencies {
     testFixturesImplementation project(':aics-infra')
     testFixturesImplementation project(':aics-global-utils')
 }
+
+apply from: "../gradle/jacoco.gradle"
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
