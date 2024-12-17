@@ -1,4 +1,4 @@
-name: Jacoco Validation On Pull Request
+name: Validate Test Coverage and Upload to Codecov On Pull Request
 
 on:
   pull_request:
@@ -12,6 +12,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: coverage
 
     steps:
       - name: Check out repository
@@ -48,3 +49,11 @@ jobs:
         with:
           script: |
             core.setFailed('Overall coverage is less than 80%!')
+
+      - name: Upload coverage reports to Codecov
+        if: steps.jacoco.outcome == 'success'
+        uses: codecov/codecov-action@v4
+        continue-on-error: true
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: '**/build/jacoco/test/jacocoTestReport.xml'
