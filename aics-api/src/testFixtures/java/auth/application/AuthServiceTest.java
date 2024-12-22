@@ -3,20 +3,24 @@ package auth.application;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 
+import kgu.developers.api.auth.application.AuthService;
+import kgu.developers.api.auth.presentation.exception.TokenNotFoundException;
+import kgu.developers.api.auth.presentation.request.LoginRequest;
+import kgu.developers.api.auth.presentation.request.RefreshTokenRequest;
+import kgu.developers.api.auth.presentation.response.TokenResponse;
+import kgu.developers.api.user.application.UserService;
+import kgu.developers.common.auth.jwt.JwtProperties;
+import kgu.developers.common.auth.jwt.TokenProvider;
+import kgu.developers.domain.refreshtoken.domain.RefreshTokenRepository;
+import kgu.developers.domain.user.domain.Major;
+import kgu.developers.domain.user.domain.User;
+import kgu.developers.domain.user.exception.InvalidPasswordException;
+import mock.FakeRefreshTokenRepository;
+import mock.FakeUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-import kgu.developers.api.auth.application.AuthService;
-import kgu.developers.api.auth.presentation.request.LoginRequest;
-import kgu.developers.api.user.application.UserService;
-import kgu.developers.common.auth.jwt.JwtProperties;
-import kgu.developers.common.auth.jwt.TokenProvider;
-import kgu.developers.domain.user.domain.Major;
-import kgu.developers.domain.user.domain.User;
-import kgu.developers.domain.user.exception.InvalidPasswordException;
-import mock.FakeUserRepository;
 
 public class AuthServiceTest {
 	private AuthService authService;
@@ -25,6 +29,7 @@ public class AuthServiceTest {
 	public void init() {
 		FakeUserRepository fakeUserRepository = new FakeUserRepository();
 		BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+		RefreshTokenRepository refreshTokenRepository = new FakeRefreshTokenRepository();
 
 		this.authService = AuthService.builder()
 			.userService(
@@ -39,6 +44,7 @@ public class AuthServiceTest {
 					.jwtProperties(new JwtProperties("testIssuer", "testSecretKey"))
 					.build()
 			)
+			.refreshTokenRepository(refreshTokenRepository)
 			.build();
 
 		fakeUserRepository.save(User.builder()
@@ -85,5 +91,42 @@ public class AuthServiceTest {
 				.build()
 			);
 		}).isInstanceOf(InvalidPasswordException.class);
+	}
+
+	@Test
+	@DisplayName("reissue는 토큰을 재발급할 수 있다")
+	public void reissue_Success() {
+		// given
+		String userId = "202411345";
+		String password = "password1234";
+
+		// when
+		TokenResponse tokenResponse = authService.login(LoginRequest.builder()
+			.userId(userId)
+			.password(password)
+			.build()
+		);
+
+		// then
+		assertThatCode(() -> {
+			authService.reissue(RefreshTokenRequest.builder()
+				.refreshToken(tokenResponse.refreshToken())
+				.build());
+		}).doesNotThrowAnyException();
+	}
+
+	@Test
+	@DisplayName("reissue는 RefreshToken이 틀리면 TokenNotFoundException을 발생시킨다")
+	public void reissue_TokenNotFoundException_ThrowsException() {
+		// given
+		String refreshToken = "eyJNOTREALTOKEN.eyJzdWIiOiJhZG1pbiIsILJdhDYTYzNzQwNjQwMH0.7J";
+
+		// when
+		// then
+		assertThatThrownBy(() -> {
+			authService.reissue(RefreshTokenRequest.builder()
+				.refreshToken(refreshToken)
+				.build());
+		}).isInstanceOf(TokenNotFoundException.class);
 	}
 }
