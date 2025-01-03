@@ -20,8 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @Profile("local")
 public class ExceptionLoggingAspect {
 
-	@Pointcut("execution(public * kgu.developers..*(..)) && "
-		+ "!execution(* kgu.developers.api..application..*(..)) && "
+	@Pointcut("execution(* kgu.developers.api..application..*(..)) && "
 		+ "!execution(* kgu.developers.common..*(..)) && "
 		+ "!@annotation(kgu.developers.globalutils.annotation.NoLogging) && "
 		+ "!@annotation(org.springframework.boot.context.properties.ConfigurationProperties)"

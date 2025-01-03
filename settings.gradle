@@ -1,4 +1,5 @@
 rootProject.name = 'aics-server'
+include 'aics-admin'
 include 'aics-api'
 include 'aics-common'
 include 'aics-domain'

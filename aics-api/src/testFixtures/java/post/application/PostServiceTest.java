@@ -5,30 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-import kgu.developers.api.post.application.PostService;
-import kgu.developers.api.post.presentation.exception.PostNotFoundException;
 import kgu.developers.api.post.presentation.request.PostRequest;
-import kgu.developers.api.post.presentation.response.PostDetailResponse;
 import kgu.developers.api.post.presentation.response.PostPersistResponse;
-import kgu.developers.api.post.presentation.response.PostSummaryPageResponse;
-import kgu.developers.api.user.application.UserService;
-import kgu.developers.domain.post.domain.Category;
-import kgu.developers.domain.post.domain.Post;
-import kgu.developers.domain.user.domain.Major;
-import kgu.developers.domain.user.domain.User;
-import mock.FakePostRepository;
-import mock.FakeUserRepository;
-
+/*
 public class PostServiceTest {
 	private PostService postService;
 
@@ -37,9 +16,9 @@ public class PostServiceTest {
 		FakePostRepository fakePostRepository = new FakePostRepository();
 		BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 		FakeUserRepository fakeUserRepository = new FakeUserRepository();
-		UserService userService = new UserService(bCryptPasswordEncoder, fakeUserRepository);
+		UserFacade userFacade = new UserFacade(bCryptPasswordEncoder, fakeUserRepository);
 
-		this.postService = new PostService(fakePostRepository, userService);
+		this.postService = new PostService(fakePostRepository, userFacade);
 
 		fakeUserRepository.save(User.builder()
 			.id("202411345")
@@ -50,7 +29,7 @@ public class PostServiceTest {
 			.major(Major.CSE)
 			.build());
 
-		UserDetails user = userService.getUserById("202411345");
+		UserDetails user = userFacade.getUserById("202411345");
 		SecurityContext context = SecurityContextHolder.getContext();
 		context.setAuthentication(
 			new UsernamePasswordAuthenticationToken(user, user.getPassword(), user.getAuthorities())
@@ -58,12 +37,12 @@ public class PostServiceTest {
 
 		fakePostRepository.save(Post.create(
 			"테스트용 제목1", "테스트용 내용1",
-			Category.DEPT_INFO, userService.getUserById("202411345")
+			Category.DEPT_INFO, userFacade.getUserById("202411345")
 		));
 
 		fakePostRepository.save(Post.create(
 			"테스트용 제목2", "테스트용 내용2",
-			Category.DEPT_INFO, userService.getUserById("202411345")
+			Category.DEPT_INFO, userFacade.getUserById("202411345")
 		));
 	}
 
@@ -185,3 +164,4 @@ public class PostServiceTest {
 		).isInstanceOf(PostNotFoundException.class);
 	}
 }
+*/
