@@ -77,7 +77,10 @@ public class SecurityConfig {
 		"/api/v1/auth/**",
 		"/api/v1/professors",
 		"/api/v1/abouts",
-		"/api/v1/clubs"
+		"/api/v1/clubs",
+		"/api/v1/posts/**",
+		"/api/v1/labs",
+		"/api/v1/comments",
 	};
 
 	CorsConfigurationSource corsConfigurationSource() {
