@@ -38,12 +38,21 @@ public class Professor extends BaseTimeEntity {
 	@Column(nullable = false, unique = true, length = 50)
 	private String email;
 
-	public static Professor create(String name, Role role, String contact, String email) {
+	@Column(nullable = false)
+	private String img;
+
+	@Column(nullable = false, length = 20)
+	private String officeLoc;
+
+	public static Professor create(String name, Role role, String contact,
+								   String email, String img, String officeLoc) {
 		return Professor.builder()
 			.name(name)
 			.role(role)
 			.contact(contact)
 			.email(email)
+			.img(img)
+			.officeLoc(officeLoc)
 			.build();
 	}
 
@@ -61,5 +70,13 @@ public class Professor extends BaseTimeEntity {
 
 	public void updateEmail(String email) {
 		this.email = email;
+	}
+
+	public void updateImage(String image) {
+		this.img = image;
+	}
+
+	public void updateOfficeLoc(String officeLoc) {
+		this.officeLoc = officeLoc;
 	}
 }

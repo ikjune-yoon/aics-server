@@ -48,6 +48,8 @@ CREATE TABLE professor
     name       VARCHAR(10)  NOT NULL,
     contact    VARCHAR(15)  NOT NULL UNIQUE,
     email      VARCHAR(50)  NOT NULL UNIQUE,
+    img        VARCHAR(255) NOT NULL,
+    office_loc VARCHAR(20)  NOT NULL,
     role       VARCHAR(20)  NOT NULL
         CONSTRAINT professor_role_check
             CHECK ((role)::TEXT = ANY (ARRAY ['PROFESSOR', 'ASSISTANT'])),

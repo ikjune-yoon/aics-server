@@ -15,10 +15,11 @@ public record ProfessorListResponse(
 		example = "[{"
 			+ "\"id\": 1, "
 			+ "\"name\": \"이은정\", "
-			+ "\"officeLoc\": \"8213호\", "
+			+ "\"type\": \"조교수\", "
 			+ "\"contact\": \"031-249-9671\", "
+			+ "\"officeLoc\": \"8213호\", "
 			+ "\"email\": \"ejlee@kyonggi.ac.kr\", "
-			+ "\"course\": \"프로그래밍언어론\"}]",
+			+ "\"img\": \"https://image.com/professor/profile/image\"}]",
 		requiredMode = REQUIRED)
 	List<ProfessorResponse> contents
 ) {

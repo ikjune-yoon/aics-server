@@ -26,7 +26,16 @@ public record ProfessorRequest(
 	@Schema(description = "이메일", example = "ejlee@kyonggi.ac.kr", requiredMode = REQUIRED)
 	@Pattern(regexp = "^[A-Za-z0-9._%+-]+@(kyonggi|kgu)\\.ac\\.kr$", message = "학교 이메일 형식으로 입력해주세요.")
 	@NotNull
-	String email
+	String email,
+
+	@Schema(description = "이미지 URL", example = "https://image.com/professor/profile/image", requiredMode = REQUIRED)
+	@NotNull
+	@Pattern(regexp = "^https?://.*$", message = "올바른 URL 형식이 아닙니다.")
+	String img,
+
+	@Schema(description = "연구실 위치", example = "8213호", requiredMode = REQUIRED)
+	@NotNull
+	String officeLoc
 ) {
 }
 
