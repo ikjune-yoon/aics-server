@@ -24,9 +24,13 @@ CREATE TABLE lab
     name       VARCHAR(16)  NOT NULL,
     loc        VARCHAR(10)  NOT NULL,
     site       VARCHAR(50)  NOT NULL,
+    advisor    VARCHAR(16)  NOT NULL,
+    file_id    BIGINT UNIQUE,
     created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP(6)          DEFAULT NULL
+    deleted_at TIMESTAMP(6)          DEFAULT NULL,
+    CONSTRAINT fk_lab_file FOREIGN KEY (file_id) REFERENCES file_entity (id)
+        ON DELETE SET NULL
 );
 
 -- club
