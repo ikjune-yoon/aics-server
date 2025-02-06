@@ -1,7 +1,11 @@
 package kgu.developers.admin.post.presentation;
 
-import static org.springframework.http.HttpStatus.CREATED;
-
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import kgu.developers.admin.post.application.PostAdminFacade;
+import kgu.developers.admin.post.presentation.request.PostRequest;
+import kgu.developers.admin.post.presentation.response.PostPersistResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,14 +14,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
-import kgu.developers.admin.post.application.PostAdminFacade;
-import kgu.developers.admin.post.presentation.request.PostRequest;
-import kgu.developers.admin.post.presentation.response.PostPersistResponse;
-import lombok.RequiredArgsConstructor;
+import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,16 +29,17 @@ public class PostAdminControllerImpl implements PostAdminController {
 	@Override
 	@PostMapping
 	public ResponseEntity<PostPersistResponse> createPost(
+		@RequestParam(required = false) Long fileId,
 		@Valid @RequestBody PostRequest request
 	) {
-		PostPersistResponse response = postAdminFacade.createPost(request);
+		PostPersistResponse response = postAdminFacade.createPost(fileId, request);
 		return ResponseEntity.status(CREATED).body(response);
 	}
 
 	@Override
 	@PatchMapping("/{postId}")
 	public ResponseEntity<Void> updatePost(
-		@Positive @PathVariable  Long postId,
+		@Positive @PathVariable Long postId,
 		@Valid @RequestBody PostRequest request
 	) {
 		postAdminFacade.updatePost(postId, request);

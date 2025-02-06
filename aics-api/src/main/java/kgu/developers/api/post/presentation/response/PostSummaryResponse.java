@@ -1,14 +1,13 @@
 package kgu.developers.api.post.presentation.response;
 
-import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
-
-import java.time.format.DateTimeFormatter;
-
-import org.springframework.format.annotation.DateTimeFormat;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import kgu.developers.domain.post.domain.Post;
 import lombok.Builder;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.format.DateTimeFormatter;
+
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 @Builder
 public record PostSummaryResponse(
@@ -23,6 +22,9 @@ public record PostSummaryResponse(
 
 	@Schema(description = "작성자 이름", example = "홈피관리자", requiredMode = REQUIRED)
 	String author,
+
+	@Schema(description = "게시글 내용 앞부분 30자", example = "2024학년도 학과 소개가 아래와 같은 일정으로 진행됩", requiredMode = REQUIRED)
+	String description,
 
 	@Schema(description = "조회수", example = "19", requiredMode = REQUIRED)
 	int views,
@@ -39,11 +41,16 @@ public record PostSummaryResponse(
 ) {
 	public static PostSummaryResponse from(Post post) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+		String content = post.getContent();
+		String description = content.length() > 30 ? content.substring(0, 30) : content;
+
 		return PostSummaryResponse.builder()
 			.postId(post.getId())
 			.category(post.getCategory().getDescription())
 			.title(post.getTitle())
 			.author(post.getAuthor().getName())
+			.description(description)
 			.views(post.getViews())
 			.hasAttachment(false) // TODO : 첨부파일 여부 확인
 			.isPinned(post.isPinned())
