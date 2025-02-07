@@ -28,12 +28,16 @@ import kgu.developers.domain.file.exception.NotSupportedFileExtensionException;
 
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
+    private static final String IMAGE_CONTENT_TYPE_PREFIX = "image/";
+
     private final Path rootLocation;
     private final String url;
     private final Set<String> disallowedExtensions;
+    private final ImageResizingService imageResizingService;
 
     @Autowired
-    public FileStorageServiceImpl(FilePathProperties filePathProperties) {
+    public FileStorageServiceImpl(FilePathProperties filePathProperties,
+        ImageResizingService imageResizingService) {
         this.rootLocation = Paths.get(filePathProperties.getUploadPath())
                 .toAbsolutePath().normalize();
         this.url = filePathProperties.getUrl();
@@ -43,6 +47,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         } catch (Exception e) {
             throw new FileDirectoryCreationFailedException();
         }
+        this.imageResizingService = imageResizingService;
     }
 
     @Override
@@ -53,7 +58,15 @@ public class FileStorageServiceImpl implements FileStorageService {
         try {
             Path targetLocation = this.rootLocation.resolve(path);
             Files.copy(file.getInputStream(), targetLocation, REPLACE_EXISTING);
-            String relativePath = this.rootLocation.relativize(targetLocation).toString();
+
+            File originalFile = targetLocation.toFile();
+
+            String contentType = file.getContentType();
+            if (contentType != null && contentType.startsWith(IMAGE_CONTENT_TYPE_PREFIX)) {
+                imageResizingService.imageResize(originalFile, 800, 600, 1);
+            }
+
+            String relativePath = this.rootLocation.relativize(originalFile.toPath()).toString();
             return url + "/" + relativePath.replace(File.separator, "/");
         } catch (Exception e) {
             throw new FileStoreFailedException();
