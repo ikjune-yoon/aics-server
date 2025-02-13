@@ -1,21 +1,5 @@
 package kgu.developers.domain.user.domain;
 
-import static jakarta.persistence.CascadeType.ALL;
-import static jakarta.persistence.EnumType.STRING;
-import static jakarta.persistence.FetchType.LAZY;
-import static kgu.developers.domain.user.domain.DeptCode.isValidDeptCode;
-import static lombok.AccessLevel.PROTECTED;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
@@ -26,12 +10,28 @@ import kgu.developers.common.domain.BaseRole;
 import kgu.developers.common.domain.BaseTimeEntity;
 import kgu.developers.domain.post.domain.Post;
 import kgu.developers.domain.user.exception.DeptCodeNotValidException;
+import kgu.developers.domain.user.exception.DuplicatePasswordException;
 import kgu.developers.domain.user.exception.EmailDomainNotValidException;
 import kgu.developers.domain.user.exception.InvalidPasswordException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import static jakarta.persistence.CascadeType.ALL;
+import static jakarta.persistence.EnumType.STRING;
+import static jakarta.persistence.FetchType.LAZY;
+import static kgu.developers.domain.user.domain.DeptCode.isValidDeptCode;
+import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @Getter
@@ -69,11 +69,12 @@ public class User extends BaseTimeEntity implements UserDetails {
 	@OneToMany(mappedBy = "author", cascade = ALL, fetch = LAZY)
 	List<Post> posts = new ArrayList<>();
 
-	public static User create(String id, String password, String name, String email, String phone, Major major) {
+	public static User create(String id, String password, String name, String email,
+							  String phone, Major major, PasswordEncoder passwordEncoder) {
 		validateDept(id, email);
 		return User.builder()
 			.id(id)
-			.password(password)
+			.password(encodePassword(password, passwordEncoder))
 			.name(name)
 			.email(email)
 			.phone(phone)
@@ -132,5 +133,19 @@ public class User extends BaseTimeEntity implements UserDetails {
 		if (!passwordEncoder.matches(rawPassword, this.password)) {
 			throw new InvalidPasswordException();
 		}
+	}
+
+	public void isNewPasswordMatching(String rawPassword, PasswordEncoder passwordEncoder) {
+		if (passwordEncoder.matches(rawPassword, this.password)) {
+			throw new DuplicatePasswordException();
+		}
+	}
+
+	public void updatePassword(String password, PasswordEncoder passwordEncoder) {
+		this.password = encodePassword(password, passwordEncoder);
+	}
+
+	private static String encodePassword(String password, PasswordEncoder passwordEncoder) {
+		return passwordEncoder.encode(password);
 	}
 }

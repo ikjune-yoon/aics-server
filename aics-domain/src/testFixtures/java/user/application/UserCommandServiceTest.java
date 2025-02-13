@@ -1,35 +1,39 @@
 package user.application;
 
-import static kgu.developers.domain.user.domain.Major.CSE;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import kgu.developers.domain.user.application.command.UserCommandService;
+import kgu.developers.domain.user.domain.Major;
+import kgu.developers.domain.user.domain.User;
+import kgu.developers.domain.user.exception.DuplicatePasswordException;
+import kgu.developers.domain.user.exception.UserIdDuplicateException;
+import mock.repository.FakeUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import kgu.developers.domain.user.application.command.UserCommandService;
-import kgu.developers.domain.user.domain.Major;
-import kgu.developers.domain.user.domain.User;
-import kgu.developers.domain.user.exception.UserIdDuplicateException;
-import mock.repository.FakeUserRepository;
+import static kgu.developers.domain.user.domain.Major.CSE;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UserCommandServiceTest {
 	private UserCommandService userCommandService;
+	private User user;
 
 	@BeforeEach
 	public void init() {
 		FakeUserRepository fakeUserRepository = new FakeUserRepository();
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		userCommandService = new UserCommandService(
 			new BCryptPasswordEncoder(),
 			fakeUserRepository
 		);
 
-		fakeUserRepository.save(User.builder()
+		user = User.builder()
 			.id("202411345")
-			.build()
-		);
+			.password(passwordEncoder.encode("password"))
+			.build();
+		fakeUserRepository.save(user);
 	}
 
 	@Test
@@ -81,5 +85,30 @@ public class UserCommandServiceTest {
 		// then
 		assertEquals("kim@kyonggi.ac.kr", user.getEmail());
 		assertEquals("010-0000-0000", user.getPhone());
+	}
+
+	@Test
+	@DisplayName("updatePassword는 User의 비밀번호를 수정할 수 있다")
+	public void updatePassword_Success() {
+		// given
+		String originalPassword = "password";
+		String newPassword = "newPassword";
+
+		// when
+		// then
+		assertDoesNotThrow(() -> userCommandService.updatePassword(user, originalPassword, newPassword));
+	}
+
+	@Test
+	@DisplayName("updatePassword는 기존 비밀번호와 같은 비밀번호로 수정하면 DuplicatePasswordException를 발생시킨다")
+	public void updatePassword_ThrowsException() {
+		// given
+		String originalPassword = "password";
+		String newPassword = "password";
+
+		// when
+		// then
+		assertThatThrownBy(() -> userCommandService.updatePassword(user, originalPassword, newPassword))
+			.isInstanceOf(DuplicatePasswordException.class);
 	}
 }

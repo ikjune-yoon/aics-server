@@ -1,8 +1,5 @@
 package kgu.developers.api.user.presentation;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -11,9 +8,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import kgu.developers.api.user.presentation.request.UserCreateRequest;
+import kgu.developers.api.user.presentation.request.UserPasswordUpdateRequest;
 import kgu.developers.api.user.presentation.request.UserUpdateRequest;
 import kgu.developers.api.user.presentation.response.UserPersistResponse;
 import kgu.developers.domain.user.application.response.UserDetailResponse;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "User", description = "회원 API")
 public interface UserController {
@@ -53,5 +53,17 @@ public interface UserController {
 			description = "회원 정보 수정 request 객체 입니다.",
 			required = true
 		) @Valid @RequestBody UserUpdateRequest request
+	);
+
+	@Operation(summary = "회원 비밀번호 수정 API", description = """
+			- Description : 이 API는 회원의 비밀번호를 수정 합니다.
+			- Assignee : 이신행
+		""")
+	@ApiResponse(responseCode = "204")
+	ResponseEntity<Void> updatePassword(
+		@Parameter(
+			description = "회원 비밀번호 수정 request 객체 입니다.",
+			required = true
+		) @Valid @RequestBody UserPasswordUpdateRequest request
 	);
 }

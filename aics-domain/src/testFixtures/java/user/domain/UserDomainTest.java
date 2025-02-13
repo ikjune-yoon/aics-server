@@ -1,21 +1,23 @@
 package user.domain;
 
-import static kgu.developers.domain.user.domain.Major.CSE;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
 import kgu.developers.common.domain.BaseRole;
 import kgu.developers.domain.user.domain.Major;
 import kgu.developers.domain.user.domain.User;
 import kgu.developers.domain.user.exception.DeptCodeNotValidException;
 import kgu.developers.domain.user.exception.EmailDomainNotValidException;
 import kgu.developers.domain.user.exception.InvalidPasswordException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import static kgu.developers.domain.user.domain.Major.CSE;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class UserDomainTest {
 	private User user;
@@ -26,6 +28,7 @@ public class UserDomainTest {
 	private static final String VALID_EMAIL = "valid@kgu.ac.kr";
 	private static final String PHONE = "010-1234-5678";
 	private static final Major MAJOR = CSE;
+	private static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
 
 	@BeforeEach
 	public void init() {
@@ -33,7 +36,7 @@ public class UserDomainTest {
 	}
 
 	private User createTestUser(String id, String password, String email, Major major) {
-		return User.create(id, password, NAME, email, PHONE, major);
+		return User.create(id, password, NAME, email, PHONE, major, PASSWORD_ENCODER);
 	}
 
 	@Test
@@ -43,7 +46,7 @@ public class UserDomainTest {
 		// then
 		assertNotNull(user);
 		assertEquals(ID, user.getId());
-		assertEquals(PASSWORD, user.getPassword());
+		assertTrue(PASSWORD_ENCODER.matches(PASSWORD, user.getPassword()));
 		assertEquals(NAME, user.getName());
 		assertEquals(VALID_EMAIL, user.getEmail());
 		assertEquals(PHONE, user.getPhone());
@@ -106,5 +109,19 @@ public class UserDomainTest {
 		// then
 		assertThatThrownBy(() -> user.updateEmail(null))
 			.isInstanceOf(EmailDomainNotValidException.class);
+	}
+
+	@Test
+	@DisplayName("updatePassword는 User의 password를 수정한다.")
+	public void updatePassword_Success() {
+		// given
+		String newPassword = "newPassword";
+
+		// when
+		user.updatePassword(newPassword, PASSWORD_ENCODER);
+
+		// then
+		assertTrue(PASSWORD_ENCODER.matches(newPassword, user.getPassword()));
+		assertFalse(PASSWORD_ENCODER.matches(PASSWORD, user.getPassword()));
 	}
 }
