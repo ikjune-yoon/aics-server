@@ -1,5 +1,6 @@
 package kgu.developers.domain.user.infrastructure;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
@@ -34,5 +35,15 @@ public class UserRepositoryImpl implements UserRepository {
 	@Override
 	public PaginatedListResponse findAllByNameOrderByIdDesc(Pageable pageable, String name) {
 		return queryUserRepository.findAllByNameOrderByIdDesc(pageable, name);
+	}
+
+	@Override
+	public void deleteAllByDeletedAtBefore(int retentionDays) {
+		queryUserRepository.deleteAllByDeletedAtBefore(retentionDays);
+	}
+
+	@Override
+	public List<User> findAllById(List<String> ids) {
+		return jpaUserRepository.findAllById(ids);
 	}
 }

@@ -1,5 +1,6 @@
 package mock.repository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -63,5 +64,16 @@ public class FakeUserRepository implements UserRepository {
 			.collect(Collectors.toList());
 
 		return PaginatedListResponse.of(paginatedUsers, PageableResponse.of(pageable, userIds));
+	}
+
+	@Override
+	public void deleteAllByDeletedAtBefore(int retentionDays) {
+		LocalDateTime threshold = LocalDateTime.now().minusDays(retentionDays);
+		data.removeIf(user -> user.getDeletedAt() != null && user.getDeletedAt().isBefore(threshold));
+	}
+
+	@Override
+	public List<User> findAllById(List<String> ids) {
+		return data.stream().filter(item -> ids.contains(item.getId())).collect(Collectors.toList());
 	}
 }

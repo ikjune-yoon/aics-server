@@ -1,11 +1,21 @@
 package user.application;
 
+import static kgu.developers.common.domain.BaseRole.ADMIN;
 import static kgu.developers.domain.user.domain.Major.CSE;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import kgu.developers.admin.user.presentation.request.UserKickOutListRequest;
+import kgu.developers.domain.user.application.command.UserCommandService;
+import kgu.developers.domain.user.application.command.UserSchedulingService;
+import kgu.developers.domain.user.exception.NotDeletableUserException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,18 +29,24 @@ import kgu.developers.domain.user.application.query.UserQueryService;
 import kgu.developers.domain.user.application.response.UserDetailResponse;
 import kgu.developers.domain.user.domain.User;
 import mock.repository.FakeUserRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class UserAdminFacadeTest {
 	private UserAdminFacade userAdminFacade;
+	private User user1;
+	private User user2;
 
 	@BeforeEach
 	public void init() {
 		FakeUserRepository fakeUserRepository = new FakeUserRepository();
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		this.userAdminFacade = new UserAdminFacade(
-			new UserQueryService(fakeUserRepository)
+			new UserCommandService(passwordEncoder, fakeUserRepository),
+			new UserQueryService(fakeUserRepository),
+			new UserSchedulingService(fakeUserRepository)
 		);
 
-		fakeUserRepository.save(User.builder()
+		user1 = fakeUserRepository.save(User.builder()
 			.id("202411001")
 			.password("password1234")
 			.name("홍길동")
@@ -39,7 +55,7 @@ public class UserAdminFacadeTest {
 			.major(CSE)
 			.build());
 
-		fakeUserRepository.save(User.builder()
+		user2 = fakeUserRepository.save(User.builder()
 			.id("202411002")
 			.password("password1234")
 			.name("홍길동")
@@ -55,6 +71,7 @@ public class UserAdminFacadeTest {
 			.email("hong3@kyonggi.ac.kr")
 			.phone("010-0000-0003")
 			.major(CSE)
+			.role(ADMIN)
 			.build());
 	}
 
@@ -93,5 +110,61 @@ public class UserAdminFacadeTest {
 
 		// then
 		assertTrue(users.contents().isEmpty());
+	}
+
+	@Test
+	@DisplayName("kickOutUser는 회원을 삭제한다")
+	public void kickOutUser_Success() {
+		// given
+		UserKickOutListRequest request = UserKickOutListRequest.builder()
+			.userIds(new ArrayList<>(Collections.singleton("202411001")))
+			.build();
+
+		// when
+		userAdminFacade.kickOutUser(request);
+
+		// then
+		assertNotNull(user1.getDeletedAt());
+	}
+
+	@Test
+	@DisplayName("kickOutUser는 여러 회원을 삭제한다")
+	public void kickOutUserList_Success() {
+		new ArrayList<>();
+		// given
+		UserKickOutListRequest request = UserKickOutListRequest.builder()
+			.userIds(Arrays.asList("202411001", "202411002"))
+			.build();
+
+		// when
+		userAdminFacade.kickOutUser(request);
+
+		// then
+		assertNotNull(user1.getDeletedAt());
+		assertNotNull(user2.getDeletedAt());
+	}
+
+	@Test
+	@DisplayName("kickOutUser는 관리자 삭제 요청의 경우 NotDeletableUserException을 발생시킨다")
+	public void kickOutUser_ThrowsException() {
+		// given
+		UserKickOutListRequest request = UserKickOutListRequest.builder()
+			.userIds(new ArrayList<>(Collections.singleton("202411003")))
+			.build();
+
+		// when
+		// then
+		assertThatThrownBy(() -> userAdminFacade.kickOutUser(request))
+			.isInstanceOf(NotDeletableUserException.class);
+	}
+
+	@Test
+	@DisplayName("getLastCleanupRunTime는 마지막 scheduling cleaning 시간을 조회한다")
+	void getLastCleanupRunTime_Success() {
+		// when
+		String lastCleanupRunTime = userAdminFacade.getLastCleanupRunTime();
+
+		// then
+		assertEquals("아직 클린업 작업이 실행되지 않았습니다.", lastCleanupRunTime);
 	}
 }

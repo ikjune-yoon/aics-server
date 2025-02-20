@@ -30,6 +30,7 @@ public class AuthService {
 		String password = request.password();
 
 		User user = userQueryService.getUserById(userId);
+		user.isDeleted();
 		user.isPasswordMatching(password, passwordEncoder);
 
 		String role = user.getRole().name();

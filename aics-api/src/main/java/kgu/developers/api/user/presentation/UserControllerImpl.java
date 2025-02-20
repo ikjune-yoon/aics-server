@@ -57,4 +57,11 @@ public class UserControllerImpl implements UserController {
 		userFacade.updatePassword(request);
 		return ResponseEntity.noContent().build();
 	}
+
+	@Override
+	@PatchMapping("/delete")
+	public ResponseEntity<Void> delete() {
+		userFacade.deleteUser();
+		return ResponseEntity.noContent().build();
+	}
 }

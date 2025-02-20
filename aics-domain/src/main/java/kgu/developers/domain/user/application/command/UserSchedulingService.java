@@ -1,27 +1,27 @@
-package kgu.developers.domain.post.application.command;
+package kgu.developers.domain.user.application.command;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
+import kgu.developers.domain.user.domain.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import kgu.developers.domain.post.domain.PostRepository;
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
-public class PostSchedulingService {
-	private final PostRepository postRepository;
+public class UserSchedulingService {
+	private final UserRepository userRepository;
 
-	public static final int POST_RETENTION_DAYS = 30;
+	public static final int USER_RETENTION_DAYS = 30;
 	private LocalDateTime lastScheduledRun;
 
-	@Scheduled(cron = "0 0 0 * * *")
+//	@Scheduled(cron = "0 0 0 1 * ?")
+	@Scheduled(cron = "0 0/1 * * * ?")
 	@Transactional
 	public void cleanupOldDeletedPosts() {
-		postRepository.deleteAllByDeletedAtBefore(POST_RETENTION_DAYS);
+		userRepository.deleteAllByDeletedAtBefore(USER_RETENTION_DAYS);
 		lastScheduledRun = LocalDateTime.now();
 	}
 

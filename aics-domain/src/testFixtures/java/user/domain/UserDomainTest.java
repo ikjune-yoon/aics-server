@@ -3,17 +3,21 @@ package user.domain;
 import kgu.developers.common.domain.BaseRole;
 import kgu.developers.domain.user.domain.Major;
 import kgu.developers.domain.user.domain.User;
+import kgu.developers.domain.user.exception.AlreadyDeletedUserException;
 import kgu.developers.domain.user.exception.DeptCodeNotValidException;
 import kgu.developers.domain.user.exception.EmailDomainNotValidException;
 import kgu.developers.domain.user.exception.InvalidPasswordException;
+import kgu.developers.domain.user.exception.NotDeletableUserException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import static kgu.developers.common.domain.BaseRole.ADMIN;
 import static kgu.developers.domain.user.domain.Major.CSE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -112,7 +116,7 @@ public class UserDomainTest {
 	}
 
 	@Test
-	@DisplayName("updatePassword는 User의 password를 수정한다.")
+	@DisplayName("updatePassword는 User의 password를 수정한다")
 	public void updatePassword_Success() {
 		// given
 		String newPassword = "newPassword";
@@ -123,5 +127,49 @@ public class UserDomainTest {
 		// then
 		assertTrue(PASSWORD_ENCODER.matches(newPassword, user.getPassword()));
 		assertFalse(PASSWORD_ENCODER.matches(PASSWORD, user.getPassword()));
+	}
+
+	@Test
+	@DisplayName("validateDeletable은 일반 유저인지 판별한다")
+	public void validateDeletable_Success() {
+		// given
+		// when
+		// then
+		assertDoesNotThrow(() -> user.validateDeletable());
+	}
+
+	@Test
+	@DisplayName("validateDeletable은 관리자인 경우 NotDeletableUserException를 반환한다")
+	public void validateDeletable_throwsException() {
+		// given
+		// when
+		User user = User.builder()
+			.role(ADMIN)
+			.build();
+
+		// then
+		assertThatThrownBy(user::validateDeletable)
+			.isInstanceOf(NotDeletableUserException.class);
+	}
+
+	@Test
+	@DisplayName("isDeleted는 아직 삭제하지 않은 경우 아무일도 하지 않는다")
+	public void isDeleted_Success() {
+		// given
+		// when
+		// then
+		assertDoesNotThrow(() -> user.isDeleted());
+	}
+
+	@Test
+	@DisplayName("isDeleted는 이미 삭제한 경우 AlreadyDeletedUserException를 반환한다")
+	public void isDeleted_throwsException() {
+		// given
+		// when
+		user.delete();
+
+		// then
+		assertThatThrownBy(user::isDeleted)
+			.isInstanceOf(AlreadyDeletedUserException.class);
 	}
 }

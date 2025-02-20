@@ -9,10 +9,12 @@ import jakarta.persistence.Table;
 import kgu.developers.common.domain.BaseRole;
 import kgu.developers.common.domain.BaseTimeEntity;
 import kgu.developers.domain.post.domain.Post;
+import kgu.developers.domain.user.exception.AlreadyDeletedUserException;
 import kgu.developers.domain.user.exception.DeptCodeNotValidException;
 import kgu.developers.domain.user.exception.DuplicatePasswordException;
 import kgu.developers.domain.user.exception.EmailDomainNotValidException;
 import kgu.developers.domain.user.exception.InvalidPasswordException;
+import kgu.developers.domain.user.exception.NotDeletableUserException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,6 +32,7 @@ import java.util.List;
 import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.FetchType.LAZY;
+import static kgu.developers.common.domain.BaseRole.USER;
 import static kgu.developers.domain.user.domain.DeptCode.isValidDeptCode;
 import static lombok.AccessLevel.PROTECTED;
 
@@ -78,7 +81,7 @@ public class User extends BaseTimeEntity implements UserDetails {
 			.name(name)
 			.email(email)
 			.phone(phone)
-			.role(BaseRole.USER)
+			.role(USER)
 			.major(major)
 			.build();
 	}
@@ -95,7 +98,7 @@ public class User extends BaseTimeEntity implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return Collections.singletonList(new SimpleGrantedAuthority(BaseRole.USER.name()));
+		return Collections.singletonList(new SimpleGrantedAuthority(USER.name()));
 	}
 
 	@Override
@@ -147,5 +150,16 @@ public class User extends BaseTimeEntity implements UserDetails {
 
 	private static String encodePassword(String password, PasswordEncoder passwordEncoder) {
 		return passwordEncoder.encode(password);
+	}
+
+	public void validateDeletable() {
+		if (role != null && role != USER) {
+			throw new NotDeletableUserException();
+		}
+	}
+
+	public void isDeleted() {
+		if (deletedAt != null)
+			throw new AlreadyDeletedUserException();
 	}
 }

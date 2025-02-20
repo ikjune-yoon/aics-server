@@ -1,5 +1,6 @@
 package kgu.developers.domain.user.domain;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
@@ -14,4 +15,8 @@ public interface UserRepository {
 	Optional<User> findById(String userId);
 
 	PaginatedListResponse findAllByNameOrderByIdDesc(Pageable pageable, String name);
+
+	void deleteAllByDeletedAtBefore(int retentionDays);
+
+	List<User> findAllById(List<String> ids);
 }
