@@ -1,12 +1,11 @@
 package kgu.developers.admin.professor.presentation.request;
 
-import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import kgu.developers.domain.professor.domain.Role;
 import lombok.Builder;
+
+import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 @Builder
 public record ProfessorRequest(
@@ -14,9 +13,9 @@ public record ProfessorRequest(
 	@NotNull
 	String name,
 
-	@Schema(description = "직위", example = "ASSISTANT", requiredMode = REQUIRED)
+	@Schema(description = "직위", example = "조교수", requiredMode = REQUIRED)
 	@NotNull
-	Role role,
+	String role,
 
 	@Schema(description = "연락처", example = "031-249-9671", requiredMode = REQUIRED)
 	@Pattern(regexp = "^\\d{2,4}-\\d{3,4}-\\d{4}$", message = "유효한 전화번호 형식이 아닙니다.")
