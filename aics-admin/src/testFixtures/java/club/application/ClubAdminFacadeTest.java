@@ -10,7 +10,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import kgu.developers.admin.club.application.ClubAdminFacade;
-import kgu.developers.admin.club.presentation.request.ClubRequest;
+import kgu.developers.admin.club.presentation.request.ClubCreateRequest;
+import kgu.developers.admin.club.presentation.request.ClubUpdateRequest;
 import kgu.developers.admin.club.presentation.response.ClubPersistResponse;
 import kgu.developers.domain.club.application.command.ClubCommandService;
 import kgu.developers.domain.club.application.query.ClubQueryService;
@@ -46,7 +47,7 @@ public class ClubAdminFacadeTest {
 	@DisplayName("createClub은 Club을 생성한다")
 	void createClub_Success() {
 		// given
-		ClubRequest clubRequest = new ClubRequest(
+		ClubCreateRequest clubCreateRequest = new ClubCreateRequest(
 			"newClub",
 			"New Club Description",
 			"https://www.new-club.page"
@@ -54,7 +55,7 @@ public class ClubAdminFacadeTest {
 		Long fileId = 1L;
 
 		// when
-		ClubPersistResponse result = clubAdminFacade.createClub(fileId, clubRequest);
+		ClubPersistResponse result = clubAdminFacade.createClub(fileId, clubCreateRequest);
 		List<Club> resultData = fakeClubRepository.findAll();
 
 		// then
@@ -66,14 +67,15 @@ public class ClubAdminFacadeTest {
 	@DisplayName("updateClub은 Club을 수정한다")
 	void updateClub_Success() {
 		// given
-		ClubRequest clubRequest = new ClubRequest(
+		ClubUpdateRequest request = new ClubUpdateRequest(
 			"newClub",
 			"New Club Description",
-			"https://www.new-club.page"
+			"https://www.new-club.page",
+			1L
 		);
 
 		// when
-		clubAdminFacade.updateClub(1L, clubRequest);
+		clubAdminFacade.updateClub(1L, request);
 		Club saved = fakeClubRepository.findById(1L).get();
 
 		// then
@@ -86,15 +88,16 @@ public class ClubAdminFacadeTest {
 	@DisplayName("updateClub은 존재하지 않은 id을 수정하면 ClubNotFoundException을 발생시킨다")
 	void updateClub_throws_ClubNotFoundException() {
 		// given
-		ClubRequest clubRequest = new ClubRequest(
+		ClubUpdateRequest request = new ClubUpdateRequest(
 			"newClub",
 			"New Club Description",
-			"https://www.new-club.page"
+			"https://www.new-club.page",
+			1L
 		);
 
 		// when
 		// then
-		assertThatThrownBy(() -> clubAdminFacade.updateClub(2L, clubRequest))
+		assertThatThrownBy(() -> clubAdminFacade.updateClub(2L, request))
 			.isInstanceOf(ClubNotFoundException.class);
 	}
 

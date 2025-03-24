@@ -11,7 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import kgu.developers.admin.lab.application.LabAdminFacade;
-import kgu.developers.admin.lab.presentation.request.LabRequest;
+import kgu.developers.admin.lab.presentation.request.LabCreateRequest;
+import kgu.developers.admin.lab.presentation.request.LabUpdateRequest;
 import kgu.developers.admin.lab.presentation.response.LabPersistResponse;
 import kgu.developers.domain.file.application.query.FileQueryService;
 import kgu.developers.domain.file.domain.FileEntity;
@@ -42,7 +43,7 @@ public class LabAdminFacadeTest {
 			.loc("8500")
 			.site("http://labA.kyonggi.ac.kr")
 			.advisor("박민준")
-			.imgFile(testFile)
+			.file(testFile)
 			.build()
 		);
 	}
@@ -51,7 +52,7 @@ public class LabAdminFacadeTest {
 	@DisplayName("createLab은 Lab을 생성한다")
 	public void createLab_Success() {
 		// given
-		LabRequest request = LabRequest.builder()
+		LabCreateRequest request = LabCreateRequest.builder()
 			.name("Lab B")
 			.loc("8501")
 			.site("http://labB.kyonggi.ac.kr")
@@ -76,7 +77,7 @@ public class LabAdminFacadeTest {
 	public void updateLab_Success() {
 		// given
 		Long labId = 1L;
-		LabRequest request = LabRequest.builder()
+		LabUpdateRequest request = LabUpdateRequest.builder()
 			.name("Lab B")
 			.loc("8501")
 			.site("http://labB.kyonggi.ac.kr")

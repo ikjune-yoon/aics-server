@@ -1,18 +1,20 @@
 package lab.application;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
 import kgu.developers.domain.file.application.query.FileQueryService;
 import kgu.developers.domain.file.domain.FileEntity;
 import kgu.developers.domain.lab.application.command.LabCommandService;
 import kgu.developers.domain.lab.domain.Lab;
 import mock.repository.FakeFileRepository;
 import mock.repository.FakeLabRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LabCommandServiceTest {
 	private LabCommandService labCommandService;
@@ -66,13 +68,14 @@ public class LabCommandServiceTest {
 		String targetAdvisor = "배상원";
 
 		// when
-		labCommandService.updateLab(lab, targetName, targetLoc, targetSite, targetAdvisor);
+		labCommandService.updateLab(lab, targetName, targetLoc, targetSite, targetAdvisor, null);
 
 		// then
 		assertEquals(targetName, lab.getName());
 		assertEquals(targetLoc, lab.getLoc());
 		assertEquals(targetSite, lab.getSite());
 		assertEquals(targetAdvisor, lab.getAdvisor());
+		assertNull(lab.getFile());
 	}
 
 	@Test
