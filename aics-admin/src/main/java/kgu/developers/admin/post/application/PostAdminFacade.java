@@ -20,14 +20,14 @@ public class PostAdminFacade {
 	private final PostSchedulingService postSchedulingService;
 
 	public PostPersistResponse createPost(Long fileId, PostCreateRequest request) {
-		Long id = postCommandService.createPost(request.title(), request.content(), request.category(), fileId);
+		Long id = postCommandService.createPost(request.title(), request.content(), request.category(), fileId, request.isPinned());
 		return PostPersistResponse.from(id);
 	}
 
 	@Transactional
 	public void updatePost(Long postId, PostUpdateRequest request) {
 		Post post = postQueryService.getById(postId);
-		postCommandService.updatePost(post, request.title(), request.content(), request.category(), request.fileId());
+		postCommandService.updatePost(post, request.title(), request.content(), request.category(), request.fileId(), request.isPinned());
 	}
 
 	@Transactional
