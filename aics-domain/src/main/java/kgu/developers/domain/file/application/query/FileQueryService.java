@@ -25,4 +25,9 @@ public class FileQueryService {
 				.stream()
 				.collect(Collectors.toMap(FileEntity::getId, Function.identity()));
 	}
+
+	public String getFilePhysicalPath(Long id) {
+		return fileRepository.findPhysicalPathById(id)
+			.orElse(null);
+	}
 }
