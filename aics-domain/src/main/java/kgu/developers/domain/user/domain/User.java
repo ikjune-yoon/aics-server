@@ -4,11 +4,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import kgu.developers.common.domain.BaseRole;
 import kgu.developers.common.domain.BaseTimeEntity;
-import kgu.developers.domain.post.domain.Post;
 import kgu.developers.domain.user.exception.AlreadyDeletedUserException;
 import kgu.developers.domain.user.exception.DeptCodeNotValidException;
 import kgu.developers.domain.user.exception.DuplicatePasswordException;
@@ -24,14 +22,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.EnumType.STRING;
-import static jakarta.persistence.FetchType.LAZY;
 import static kgu.developers.common.domain.BaseRole.USER;
 import static kgu.developers.domain.user.domain.DeptCode.isValidDeptCode;
 import static lombok.AccessLevel.PROTECTED;
@@ -67,10 +62,6 @@ public class User extends BaseTimeEntity implements UserDetails {
 	@Column(nullable = false)
 	@Enumerated(STRING)
 	private Major major;
-
-	@Builder.Default
-	@OneToMany(mappedBy = "author", cascade = ALL, fetch = LAZY)
-	List<Post> posts = new ArrayList<>();
 
 	public static User create(String id, String password, String name, String email,
 							  String phone, Major major, PasswordEncoder passwordEncoder) {

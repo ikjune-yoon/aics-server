@@ -3,7 +3,6 @@ package kgu.developers.domain.post.application.command;
 import org.springframework.stereotype.Service;
 
 import kgu.developers.domain.file.application.query.FileQueryService;
-import kgu.developers.domain.file.domain.FileEntity;
 import kgu.developers.domain.post.domain.Category;
 import kgu.developers.domain.post.domain.Post;
 import kgu.developers.domain.post.domain.PostRepository;
@@ -21,11 +20,7 @@ public class PostCommandService {
 	public Long createPost(String title, String content, Category category, Long fileId, boolean isPinned) {
 		User author = userQueryService.me();
 
-		FileEntity file = null;
-		if (fileId != null)
-			file = fileQueryService.getFileById(fileId);
-
-		Post post = Post.create(title, content, category, author, file, isPinned);
+		Post post = Post.create(title, content, category, author.getId(), fileId, isPinned);
 		return postRepository.save(post).getId();
 	}
 
@@ -34,12 +29,7 @@ public class PostCommandService {
 		post.updateContent(content);
 		post.updateCategory(category);
 		post.updatePinned(isPinned);
-
-		FileEntity file = null;
-		if (fileId != null)
-			file = fileQueryService.getFileById(fileId);
-
-		post.updateFile(file);
+		post.updateFileId(fileId);
 	}
 
 	public void togglePostPinStatus(Post post) {

@@ -37,10 +37,9 @@ public class FakePostRepository implements PostRepository {
 			.content(post.getContent())
 			.views(post.getViews())
 			.category(post.getCategory())
-			.author(post.getAuthor())
+			.authorId(post.getAuthorId())
 			.isPinned(post.isPinned())
-			.comments(new ArrayList<>(post.getComments()))
-			.file(post.getFile())
+			.fileId(post.getFileId())
 			.build();
 
 		TestEntityUtils.setCreatedAt(newPost, LocalDateTime.now());
@@ -50,7 +49,7 @@ public class FakePostRepository implements PostRepository {
 	}
 
 	@Override
-	public PaginatedListResponse<Post> findAllByTitleContainingAndCategoryOrderByCreatedAtDesc(
+	public PaginatedListResponse<Post> findAllByTitleContainingAndCategoryOrderByCreatedAtDescIdDesc(
 		List<String> keywords, Category category, Pageable pageable
 	) {
 		List<Post> filteredPosts = data.stream()
@@ -60,7 +59,9 @@ public class FakePostRepository implements PostRepository {
 					&& post.getCategory().equals(category)
 					&& post.getDeletedAt() == null
 			)
-			.sorted(Comparator.comparing(Post::getCreatedAt).reversed())
+			.sorted(Comparator.comparing(Post::isPinned, Comparator.reverseOrder())
+				.thenComparing(Post::getCreatedAt, Comparator.reverseOrder())
+				.thenComparing(Post::getId))
 			.collect(Collectors.toList());
 
 		int start = (int)pageable.getOffset();
@@ -92,18 +93,28 @@ public class FakePostRepository implements PostRepository {
 	}
 
 	@Override
-	public Optional<Post> findByPrevPost(LocalDateTime createdAt, Category category) {
+	public Optional<Post> findByPrevPost(Long postId, LocalDateTime createdAt, Category category) {
 		return data.stream()
-			.filter(post -> post.getCreatedAt().isBefore(createdAt) && post.getCategory().equals(category)
+			.filter(post -> isBeforePost(post, postId, createdAt) && post.getCategory().equals(category)
 				&& post.getDeletedAt() == null)
-			.max(Comparator.comparing(Post::getCreatedAt));
+			.max(Comparator.comparing(Post::getCreatedAt).thenComparing(Post::getId));
+	}
+
+	private boolean isBeforePost(Post post, Long postId, LocalDateTime createdAt) {
+		return post.getCreatedAt().isBefore(createdAt)
+			|| (post.getCreatedAt().equals(createdAt) && post.getId() < postId);
 	}
 
 	@Override
-	public Optional<Post> findByNextPost(LocalDateTime createdAt, Category category) {
+	public Optional<Post> findByNextPost(Long postId, LocalDateTime createdAt, Category category) {
 		return data.stream()
-			.filter(post -> post.getCreatedAt().isAfter(createdAt) && post.getCategory().equals(category)
+			.filter(post -> isAfterPost(post, postId, createdAt) && post.getCategory().equals(category)
 				&& post.getDeletedAt() == null)
-			.min(Comparator.comparing(Post::getCreatedAt));
+			.min(Comparator.comparing(Post::getCreatedAt).thenComparing(Post::getId));
+	}
+
+	private boolean isAfterPost(Post post, Long postId, LocalDateTime createdAt) {
+		return post.getCreatedAt().isAfter(createdAt)
+			|| (post.getCreatedAt().equals(createdAt) && post.getId() > postId);
 	}
 }

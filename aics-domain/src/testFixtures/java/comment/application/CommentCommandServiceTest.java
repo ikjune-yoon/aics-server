@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import mock.repository.FakeFileRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,10 +38,11 @@ public class CommentCommandServiceTest {
 	@BeforeEach
 	public void init() {
 		FakePostRepository fakePostRepository = new FakePostRepository();
+		FakeFileRepository fakeFileRepository = new FakeFileRepository();
 		FakeUserRepository fakeUserRepository = new FakeUserRepository();
 		UserQueryService userQueryService = new UserQueryService(fakeUserRepository);
 
-		initializeCommentCommandService(fakePostRepository, userQueryService);
+		initializeCommentCommandService(fakePostRepository, fakeFileRepository, fakeUserRepository, userQueryService);
 		saveTestUserAndPost(fakeUserRepository, fakePostRepository);
 		setTestSecurityContext(userQueryService);
 	}
@@ -53,14 +55,16 @@ public class CommentCommandServiceTest {
 		);
 		fakePostRepository.save(Post.create(
 			"SW 부트캠프 4기 교육생 모집", "SW전문인재양성사업단에서는 SW부트캠프 4기 교육생을 모집합니다.", NEWS,
-			User.builder().build(), null, false
+			TEST_USER_ID, null, false
 		));
 	}
 
 	private void initializeCommentCommandService(FakePostRepository fakePostRepository,
+												 FakeFileRepository fakeFileRepository,
+												 FakeUserRepository fakeUserRepository,
 												 UserQueryService userQueryService) {
 		commentCommandService = new CommentCommandService(
-			new PostQueryService(fakePostRepository),
+			new PostQueryService(fakePostRepository, fakeFileRepository, fakeUserRepository),
 			userQueryService,
 			new FakeCommentRepository()
 		);
@@ -91,8 +95,8 @@ public class CommentCommandServiceTest {
 	@DisplayName("updateComment는 댓글을 수정할 수 있다.")
 	public void updateComment_Success() {
 		// given
-		Comment comment = Comment.create("SW 부트캠프 모집이 정말 기대됩니다.", User.builder().build(),
-			Post.builder().build());
+		Comment comment = Comment.create("SW 부트캠프 모집이 정말 기대됩니다.", TEST_USER_ID,
+			TEST_POST_ID);
 		String updatedCommentContent = "SW 부트캠프 모집이 정말 기대됩니다. 4기 교육생 확정이 언제일까요?";
 
 		// when
@@ -106,8 +110,8 @@ public class CommentCommandServiceTest {
 	@DisplayName("deleteComment는 댓글을 삭제할 수 있다.")
 	public void deleteComment_Success() {
 		// given
-		Comment comment = Comment.create("SW 부트캠프 모집이 정말 기대됩니다.", User.builder().build(),
-			Post.builder().build());
+		Comment comment = Comment.create("SW 부트캠프 모집이 정말 기대됩니다.", TEST_USER_ID,
+			TEST_POST_ID);
 		assertNull(comment.getDeletedAt(), "삭제 전에는 deletedAt이 null이어야 합니다");
 
 		// when

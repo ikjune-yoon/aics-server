@@ -11,14 +11,14 @@ import kgu.developers.common.response.PaginatedListResponse;
 public interface PostRepository {
 	Post save(Post post);
 
-	PaginatedListResponse<Post> findAllByTitleContainingAndCategoryOrderByCreatedAtDesc(List<String> keywords,
+	PaginatedListResponse<Post> findAllByTitleContainingAndCategoryOrderByCreatedAtDescIdDesc(List<String> keywords,
 		Category category, Pageable pageable);
 
 	Optional<Post> findByIdAndDeletedAtIsNull(Long postId);
 
 	void deleteAllByDeletedAtBefore(int retentionDays);
 
-	Optional<Post> findByPrevPost(LocalDateTime createdAt, Category category);
+	Optional<Post> findByPrevPost(Long postId, LocalDateTime createdAt, Category category);
 
-	Optional<Post> findByNextPost(LocalDateTime createdAt, Category category);
+	Optional<Post> findByNextPost(Long postId, LocalDateTime createdAt, Category category);
 }

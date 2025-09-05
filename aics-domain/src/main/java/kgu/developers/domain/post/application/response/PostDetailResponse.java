@@ -5,6 +5,8 @@ import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
 import java.time.format.DateTimeFormatter;
 
+import kgu.developers.domain.file.domain.FileEntity;
+import kgu.developers.domain.user.domain.User;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -65,18 +67,18 @@ public record PostDetailResponse(
 	PostTitleResponse nextPost
 
 ) {
-	public static PostDetailResponse from(Post post, PostTitleResponse prevPost, PostTitleResponse nextPost) {
+	public static PostDetailResponse from(Post post, User author, FileEntity file, PostTitleResponse prevPost, PostTitleResponse nextPost) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 		return PostDetailResponse.builder()
 			.postId(post.getId())
 			.category(post.getCategory().getDescription())
 			.title(post.getTitle())
 			.content(post.getContent())
-			.author(post.getAuthor().getName())
+			.author(author.getName())
 			.views(post.getViews())
 			.isPinned(post.isPinned())
-			.file(post.getFile() != null ?
-				FilePathResponse.from(post.getFile()) : null)
+			.file(file != null ?
+				FilePathResponse.from(file) : null)
 			.createdAt(post.getCreatedAt().format(formatter))
 			.prevPost(prevPost)
 			.nextPost(nextPost)

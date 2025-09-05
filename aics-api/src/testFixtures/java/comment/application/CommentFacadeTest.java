@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
+import mock.repository.FakeFileRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,17 +40,21 @@ public class CommentFacadeTest {
 	public void init() {
 		FakeCommentRepository fakeCommentRepository = new FakeCommentRepository();
 		FakeUserRepository fakeUserRepository = new FakeUserRepository();
+		FakeFileRepository fakeFileRepository = new FakeFileRepository();
 		FakePostRepository fakePostRepository = new FakePostRepository();
 
 		UserQueryService userQueryService = new UserQueryService(fakeUserRepository);
+		PostQueryService postQueryService = new PostQueryService(fakePostRepository, fakeFileRepository, fakeUserRepository);
+
 		commentFacade = new CommentFacade(
 			new CommentCommandService(
-				new PostQueryService(fakePostRepository),
+				postQueryService,
 				userQueryService,
 				fakeCommentRepository
 			),
 			new CommentQueryService(fakeCommentRepository),
-			new CommentSchedulingService(fakeCommentRepository)
+			new CommentSchedulingService(fakeCommentRepository),
+			userQueryService
 		);
 
 		User author = fakeUserRepository.save(User.builder()
@@ -62,15 +67,15 @@ public class CommentFacadeTest {
 			.build());
 
 		Post post = fakePostRepository.save(Post.create(
-			"테스트용 제목1", "테스트용 내용1", NEWS, author, null, false
+			"테스트용 제목1", "테스트용 내용1", NEWS, author.getId(), null, false
 		));
 
 		fakeCommentRepository.save(Comment.create(
-			"test1", author, post
+			"test1", author.getId(), post.getId()
 		));
 
 		Comment delete = fakeCommentRepository.save(Comment.create(
-			"test2", author, post
+			"test2", author.getId(), post.getId()
 		));
 		delete.delete();
 

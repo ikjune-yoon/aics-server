@@ -17,7 +17,6 @@ import kgu.developers.domain.comment.application.query.CommentQueryService;
 import kgu.developers.domain.comment.domain.Comment;
 import kgu.developers.domain.comment.exception.CommentNotFoundException;
 import kgu.developers.domain.post.domain.Post;
-import kgu.developers.domain.user.domain.User;
 import mock.repository.FakeCommentRepository;
 import mock.repository.FakePostRepository;
 
@@ -29,33 +28,34 @@ public class CommentQueryServiceTest {
 	private static final Long SAVED_COMMENT_ID = 2L;
 	private static final Long NOT_EXIST_COMMENT_ID = 3L;
 	private static final Long TEST_POST_ID = 1L;
+	private static final String TEST_AUTHOR_ID = "202312345";
 
 	@BeforeEach
 	public void init() {
 		FakeCommentRepository fakeCommentRepository = new FakeCommentRepository();
 		commentQueryService = new CommentQueryService(fakeCommentRepository);
 		Post post = saveTestPost();
-		deletedComment(fakeCommentRepository, post);
-		saveTestComment(fakeCommentRepository, post);
+		deletedComment(fakeCommentRepository, post.getId());
+		saveTestComment(fakeCommentRepository, post.getId());
 	}
 
-	private static void deletedComment(FakeCommentRepository fakeCommentRepository, Post post) {
+	private static void deletedComment(FakeCommentRepository fakeCommentRepository, Long postId) {
 		Comment commentToDelete = fakeCommentRepository.save(
-			Comment.create("삭제된 댓글 입니다", User.builder().build(), post)
+			Comment.create("삭제된 댓글 입니다", TEST_AUTHOR_ID, postId)
 		);
 		commentToDelete.delete();
 	}
 
-	private static void saveTestComment(FakeCommentRepository fakeCommentRepository, Post post) {
+	private static void saveTestComment(FakeCommentRepository fakeCommentRepository, Long postId) {
 		fakeCommentRepository.save(
-			Comment.create(TARGET_COMMENT_CONTENT, User.builder().build(), post)
+			Comment.create(TARGET_COMMENT_CONTENT, TEST_AUTHOR_ID, postId)
 		);
 	}
 
 	private static Post saveTestPost() {
 		FakePostRepository fakePostRepository = new FakePostRepository();
 		Post commentedPost = Post.create("SW 부트캠프 4기 교육생 모집",
-			"SW전문인재양성사업단에서는 SW부트캠프 4기 교육생을 모집합니다.", NEWS, User.builder().build(), null, false);
+			"SW전문인재양성사업단에서는 SW부트캠프 4기 교육생을 모집합니다.", NEWS, TEST_AUTHOR_ID, null, false);
 		return fakePostRepository.save(commentedPost);
 	}
 

@@ -30,9 +30,9 @@ public class PostRepositoryImpl implements PostRepository {
 	}
 
 	@Override
-	public PaginatedListResponse findAllByTitleContainingAndCategoryOrderByCreatedAtDesc(List<String> keywords,
+	public PaginatedListResponse findAllByTitleContainingAndCategoryOrderByCreatedAtDescIdDesc(List<String> keywords,
 		Category category, Pageable pageable) {
-		return queryPostRepository.findAllByTitleContainingAndCategoryOrderByCreatedAtDesc(keywords, category, pageable);
+		return queryPostRepository.findAllByTitleContainingAndCategoryOrderByCreatedAtDescIdDesc(keywords, category, pageable);
 	}
 
 	@Override
@@ -41,15 +41,13 @@ public class PostRepositoryImpl implements PostRepository {
 	}
 
 	@Override
-	public Optional<Post> findByPrevPost(LocalDateTime createdAt, Category category) {
-		return jpaPostRepository.findFirstByCreatedAtLessThanAndDeletedAtIsNullAndCategoryOrderByCreatedAtDesc(
-			createdAt, category);
+	public Optional<Post> findByPrevPost(Long postId, LocalDateTime createdAt, Category category) {
+		return queryPostRepository.findPreviousPost(postId, createdAt, category);
 	}
 
 	@Override
-	public Optional<Post> findByNextPost(LocalDateTime createdAt, Category category) {
-		return jpaPostRepository.findFirstByCreatedAtGreaterThanAndDeletedAtIsNullAndCategoryOrderByCreatedAtAsc(
-			createdAt, category);
+	public Optional<Post> findByNextPost(Long postId, LocalDateTime createdAt, Category category) {
+		return queryPostRepository.findNextPost(postId, createdAt, category);
 	}
 
 }
