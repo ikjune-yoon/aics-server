@@ -25,9 +25,11 @@ public class ProfessorCommandService {
 		professor.updateRole(role);
 		professor.updateImage(img);
 		professor.updateOfficeLoc(officeLoc);
+		professorRepository.save(professor);
 	}
 
 	public void deleteProfessor(Professor professor) {
-		professor.delete();
+		professor.markDeleted();
+		professorRepository.save(professor);
 	}
 }

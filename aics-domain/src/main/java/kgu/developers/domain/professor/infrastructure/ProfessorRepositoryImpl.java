@@ -17,12 +17,15 @@ public class ProfessorRepositoryImpl implements ProfessorRepository {
 
 	@Override
 	public Professor save(Professor professor) {
-		return jpaProfessorRepository.save(professor);
+		ProfessorJpaEntity entity = ProfessorJpaEntity.toEntity(professor);
+		ProfessorJpaEntity saveEntity = jpaProfessorRepository.save(entity);
+		return saveEntity.toDomain();
 	}
 
 	@Override
 	public Optional<Professor> findById(Long id) {
-		return jpaProfessorRepository.findById(id);
+		Optional<ProfessorJpaEntity> optionalEntity = jpaProfessorRepository.findById(id);
+		return optionalEntity.map(ProfessorJpaEntity::toDomain);
 	}
 
 	@Override

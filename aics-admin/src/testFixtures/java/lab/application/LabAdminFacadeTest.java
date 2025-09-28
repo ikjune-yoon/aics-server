@@ -35,6 +35,7 @@ public class LabAdminFacadeTest {
 			new LabQueryService(fakeLabRepository)
 		);
 
+
 		fakeLabRepository.save(Lab.builder()
 			.name("Lab A")
 			.loc("8500")

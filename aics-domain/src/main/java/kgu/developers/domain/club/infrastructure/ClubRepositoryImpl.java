@@ -2,6 +2,7 @@ package kgu.developers.domain.club.infrastructure;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 
@@ -16,17 +17,24 @@ public class ClubRepositoryImpl implements ClubRepository {
 
 	@Override
 	public Club save(Club club) {
-		return jpaClubRepository.save(club);
+		ClubJpaEntity entity = ClubJpaEntity.toEntity(club);
+		ClubJpaEntity savedEntity = jpaClubRepository.save(entity);
+
+		return savedEntity.toDomain();
 	}
 
 	@Override
 	public List<Club> findAll() {
-		return jpaClubRepository.findAll();
+		List<ClubJpaEntity> entities = jpaClubRepository.findAll();
+		return entities.stream()
+				.map(ClubJpaEntity::toDomain)
+				.collect(Collectors.toList());
 	}
 
 	@Override
 	public Optional<Club> findById(Long id) {
-		return jpaClubRepository.findById(id);
+		Optional<ClubJpaEntity> optionalEntity = jpaClubRepository.findById(id);
+		return optionalEntity.map(ClubJpaEntity::toDomain);
 	}
 
 	@Override

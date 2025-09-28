@@ -16,16 +16,21 @@ public class AboutRepositoryImpl implements AboutRepository {
 
 	@Override
 	public About save(About about) {
-		return jpaAboutRepository.save(about);
+		AboutJpaEntity entity = AboutJpaEntity.toEntity(about);
+		AboutJpaEntity savedEntity = jpaAboutRepository.save(entity);
+		return savedEntity.toDomain();
+
 	}
 
 	@Override
 	public Optional<About> findByCategory(Category category) {
-		return jpaAboutRepository.findByCategory(category);
+		Optional<AboutJpaEntity> optionalEntity = jpaAboutRepository.findByCategory(category);
+		return optionalEntity.map(AboutJpaEntity::toDomain);
 	}
 
 	@Override
 	public Optional<About> findById(Long id) {
-		return jpaAboutRepository.findById(id);
+		Optional<AboutJpaEntity> optionalEntity = jpaAboutRepository.findById(id);
+		return optionalEntity.map(AboutJpaEntity::toDomain);
 	}
 }

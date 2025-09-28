@@ -9,9 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import kgu.developers.domain.club.application.command.ClubCommandService;
 import kgu.developers.domain.club.domain.Club;
-import kgu.developers.domain.file.application.query.FileQueryService;
 import mock.repository.FakeClubRepository;
-import mock.repository.FakeFileRepository;
 
 public class ClubCommandServiceTest {
 	private ClubCommandService clubCommandService;
@@ -19,8 +17,6 @@ public class ClubCommandServiceTest {
 
 	@BeforeEach
 	public void init() {
-		FakeFileRepository fakeFileRepository = new FakeFileRepository();
-		FileQueryService fileQueryService = new FileQueryService(fakeFileRepository);
 		fakeClubRepository = new FakeClubRepository();
 		clubCommandService = new ClubCommandService(fakeClubRepository);
 
@@ -52,7 +48,7 @@ public class ClubCommandServiceTest {
 	@DisplayName("updateClub은 Club 객체를 수정한다.")
 	public void updateClub_Success() {
 		// given
-		Club club = Club.create("a", "a 동아리", "http://club-a.kyonggi.ac.kr", null);
+		Club club = fakeClubRepository.findById(1L).orElseThrow();
 
 		String newName = "b";
 		String newDescription = "b 동아리";
@@ -60,12 +56,12 @@ public class ClubCommandServiceTest {
 
 		// when
 		clubCommandService.updateClub(club, newName, newDescription, newSite, null);
-
 		// then
 		assertEquals(newName, club.getName());
 		assertEquals(newDescription, club.getDescription());
 		assertEquals(newSite, club.getSite());
 		assertNull(club.getFileId());
+
 	}
 
 	@Test
