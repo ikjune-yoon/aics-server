@@ -4,7 +4,11 @@ import kgu.developers.domain.graduationUser.application.command.GraduationUserCo
 import kgu.developers.domain.graduationUser.domain.GraduationType;
 import kgu.developers.domain.graduationUser.domain.GraduationUser;
 import kgu.developers.domain.graduationUser.exception.GraduationUserIdDuplicateException;
+import kgu.developers.domain.schedule.domain.Schedule;
+import kgu.developers.domain.schedule.domain.SubmissionType;
+import kgu.developers.domain.user.domain.User;
 import mock.repository.FakeGraduationUserRepository;
+import mock.repository.FakeUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,9 +23,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class GraduationUserCommandServiceTest {
     private GraduationUserCommandService graduationUserCommandService;
     private FakeGraduationUserRepository fakeGraduationUserRepository;
+    private FakeUserRepository fakeUserRepository;
     private GraduationUser graduationUser;
 
     private static final Long TARGET_GRADUATION_USER_ID = 2L;
+    private static final String TARGET_STUDENT_ID = "202411444";
 
     @BeforeEach
     public void init() {
@@ -29,12 +35,19 @@ public class GraduationUserCommandServiceTest {
     }
 
     private void initializeGraduationUserCommandService() {
+        fakeUserRepository = new FakeUserRepository();
         fakeGraduationUserRepository = new FakeGraduationUserRepository();
-        graduationUserCommandService = new GraduationUserCommandService(fakeGraduationUserRepository);
-        graduationUser = fakeGraduationUserRepository.save(saveTestGraduatoinuser());
+        graduationUserCommandService = new GraduationUserCommandService(fakeGraduationUserRepository, fakeUserRepository);
+        saveTestUser();
+        graduationUser = fakeGraduationUserRepository.save(saveTestGraduationuser());
     }
 
-    private GraduationUser saveTestGraduatoinuser() {
+    private void saveTestUser() {
+        fakeUserRepository.save(User.builder().id(TARGET_STUDENT_ID).build());
+        fakeUserRepository.save(User.builder().id("202211444").build());
+    }
+
+    private GraduationUser saveTestGraduationuser() {
         return GraduationUser.create("202211444", "홍길동", "김교수", true, "컴퓨터공학과", LocalDate.of(2024, 2, 20));
     }
 
@@ -42,14 +55,13 @@ public class GraduationUserCommandServiceTest {
     @DisplayName("createGraduationUser는 GraduationUser를 생성할 수 있다.")
     public void createGraduationUser_Success() {
         //given
-        String studentId = "202411444";
         String name = "홍길동";
         String advisor = "김교수";
         Boolean capstoneCompletion = true;
         String department = "컴퓨터공학과";
         LocalDate graduationDate = LocalDate.of(2024, 2, 20);
         //when
-        Long createdGraduatoinUserId = graduationUserCommandService.createGraduationUser(studentId, name, advisor, capstoneCompletion, department, graduationDate);
+        Long createdGraduatoinUserId = graduationUserCommandService.createGraduationUser(TARGET_STUDENT_ID, name, advisor, capstoneCompletion, department, graduationDate);
 
         //then
         assertEquals(TARGET_GRADUATION_USER_ID, createdGraduatoinUserId);
@@ -93,4 +105,48 @@ public class GraduationUserCommandServiceTest {
         //then
         assertNotNull(graduationUser.getDeletedAt());
     }
+
+    @Test
+    @DisplayName("updateGraduationUserEmail은 GraduationUser의 이메일을 저장한다.")
+    public void updateGraduationUserEmail_Success() {
+        //given
+        String email = "example@kyonggi.ac.kr";
+
+        //when
+        graduationUserCommandService.updateGraduationUserEmail(graduationUser,email);
+
+        //then
+        assertEquals(graduationUser.getEmail(),email);
+    }
+
+    @Test
+    @DisplayName("updateCertificate은 GraduationUser의 자격증ID를 저장한다.")
+    public void updateCertificate_Success() {
+        //given
+        Long certificateId = 1L;
+
+        //when
+        graduationUserCommandService.updateCertificate(graduationUser, certificateId);
+
+        //then
+        assertEquals(graduationUser.getCertificateId(),certificateId);
+    }
+
+    @Test
+    @DisplayName("updateMidThesis은 주어진 타입에 따라 GraduationUser의 논문ID를 저장한다.")
+    public void updateThesis_Success() {
+        //given
+        Long thesisId = 1L;
+        Schedule schedule = Schedule.builder()
+            .id(1L)
+            .submissionType(SubmissionType.FINALTHESIS)
+            .build();
+
+        //when
+        graduationUserCommandService.updateThesis(graduationUser, thesisId, schedule);
+
+        //then
+        assertEquals(graduationUser.getFinalThesisId(),thesisId);
+    }
+
 }

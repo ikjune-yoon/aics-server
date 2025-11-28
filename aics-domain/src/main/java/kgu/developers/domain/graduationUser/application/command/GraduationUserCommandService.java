@@ -4,25 +4,33 @@ import kgu.developers.domain.graduationUser.domain.GraduationType;
 import kgu.developers.domain.graduationUser.domain.GraduationUser;
 import kgu.developers.domain.graduationUser.domain.GraduationUserRepository;
 import kgu.developers.domain.graduationUser.exception.GraduationUserIdDuplicateException;
+import kgu.developers.domain.schedule.domain.Schedule;
+import kgu.developers.domain.user.domain.UserRepository;
+import kgu.developers.domain.user.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class GraduationUserCommandService {
     private final GraduationUserRepository graduationUserRepository;
+    private final UserRepository userRepository;
 
     public Long createGraduationUser(String studentId, String name, String advisor, Boolean capstoneCompletion, String department, LocalDate graduationDate) {
-        validateDuplicateId(studentId);
+        validateId(studentId);
         GraduationUser graduationUser = GraduationUser.create(studentId,name,advisor,capstoneCompletion,department,graduationDate);
         return graduationUserRepository.save(graduationUser).getId();
     }
 
-    private void validateDuplicateId(String id) {
+    private void validateId(String id) {
         if (graduationUserRepository.findByUserIdAndDeletedAtIsNull(id).isPresent())
             throw new GraduationUserIdDuplicateException();
+        if(userRepository.findById(id).isEmpty())
+            throw new UserNotFoundException();
     }
 
     public void updateGraduationType(GraduationUser graduationUser, GraduationType type) {
@@ -37,6 +45,19 @@ public class GraduationUserCommandService {
 
     public void updateGraduationUserEmail(GraduationUser graduationUser, String email) {
         graduationUser.updateEmail(email);
+        graduationUserRepository.save(graduationUser);
+    }
+
+    public void updateCertificate(GraduationUser graduationUser, Long certificateId) {
+        graduationUser.updateCertificate(certificateId);
+        graduationUserRepository.save(graduationUser);
+    }
+
+    public void updateThesis(GraduationUser graduationUser, Long thesisId, Schedule schedule) {
+        switch (schedule.getSubmissionType()) {
+            case MIDTHESIS -> graduationUser.updateMidThesisId(thesisId);
+            case FINALTHESIS -> graduationUser.updateFinalThesisId(thesisId);
+        }
         graduationUserRepository.save(graduationUser);
     }
 }

@@ -5,9 +5,11 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import kgu.developers.admin.graduationUser.application.GraduationUserAdminFacade;
 import kgu.developers.admin.graduationUser.presentation.dto.GraduationUserExcelFileDto;
+import kgu.developers.admin.graduationUser.presentation.request.GraduationUserBatchApproveRequest;
 import kgu.developers.admin.graduationUser.presentation.request.GraduationUserBatchCreateRequest;
 import kgu.developers.admin.graduationUser.presentation.request.GraduationUserBatchDeleteRequest;
 import kgu.developers.admin.graduationUser.presentation.request.GraduationUserCreateRequest;
+import kgu.developers.admin.graduationUser.presentation.response.GraduationUserBatchApproveResponse;
 import kgu.developers.admin.graduationUser.presentation.response.GraduationUserBatchCreateResponse;
 import kgu.developers.admin.graduationUser.presentation.response.GraduationUserBatchDeleteResponse;
 import kgu.developers.admin.graduationUser.presentation.response.GraduationUserDetailResponse;
@@ -24,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -107,9 +110,18 @@ public class GraduationUserAdminControllerImpl implements GraduationUserAdminCon
     @Override
     @DeleteMapping("/batch")
     public ResponseEntity<GraduationUserBatchDeleteResponse> deleteGraduationUsers(
-        GraduationUserBatchDeleteRequest request
+            @Valid @RequestBody GraduationUserBatchDeleteRequest request
     ) {
         GraduationUserBatchDeleteResponse response = graduationUserAdminFacade.deleteGraduationUsers(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    @PatchMapping("/batch/approve")
+    public ResponseEntity<GraduationUserBatchApproveResponse> approveGraduationUsers(
+            @Valid @RequestBody GraduationUserBatchApproveRequest request
+    ) {
+        GraduationUserBatchApproveResponse response = graduationUserAdminFacade.approveGraduationUsers(request);
         return ResponseEntity.ok(response);
     }
 }
