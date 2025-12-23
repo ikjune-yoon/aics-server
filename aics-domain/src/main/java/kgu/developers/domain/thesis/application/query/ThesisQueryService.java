@@ -11,10 +11,6 @@ import org.springframework.stereotype.Service;
 public class ThesisQueryService {
     private final ThesisRepository thesisRepository;
 
-    public boolean isApproved(Long id) {
-        return thesisRepository.findApprovalByIdAndDeletedAtIsNull(id)
-                .orElseThrow(ThesisNotFoundException::new);
-    }
     public Thesis getById(Long id) {
         return thesisRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(ThesisNotFoundException::new);
