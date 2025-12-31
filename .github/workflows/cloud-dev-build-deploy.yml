@@ -1,4 +1,4 @@
-name: Build and Deploy to Development Server
+name: Build and Deploy to Development Server on Cloud
 
 on:
   push:
@@ -9,11 +9,11 @@ on:
 jobs:
   build-docker-image:
     runs-on: ubuntu-latest
-    environment: dev
+    environment: cloud-dev
 
     steps:
       - name: get repo from github
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # JDK setting
       - name: Set up JDK 17
@@ -34,7 +34,7 @@ jobs:
 
       # DockerHub 로그인
       - name: Docker login
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -74,20 +74,20 @@ jobs:
   deploy-to-dev:
     runs-on: ubuntu-latest
     needs: build-docker-image
-    environment: dev
+    environment: cloud-dev
 
     steps:
       - name: checkout repository
         uses: actions/checkout@v3
 
-      - name: scp docker-compose.yml to server
+      - name: scp docker-compose and Caddyfile to server
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
-          password: ${{ secrets.SERVER_PASSWORD }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SERVER_PORT }}
-          source: docker/development/docker-compose.yml
+          source: "docker/development/docker-compose.yml, caddy/development/Caddyfile"
           target: ${{ secrets.DOCKER_COMPOSE_YAML_PATH }}
           strip_components: 2
 
@@ -96,13 +96,11 @@ jobs:
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
-          password: ${{ secrets.SERVER_PASSWORD }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SERVER_PORT }}
           script: |
-            echo "${{ secrets.SERVER_PASSWORD }}" | sudo -S docker-compose -f ${{ secrets.DOCKER_COMPOSE_YAML_PATH }}/docker-compose.yml pull aics-api
-            echo "${{ secrets.SERVER_PASSWORD }}" | sudo -S docker-compose -f ${{ secrets.DOCKER_COMPOSE_YAML_PATH }}/docker-compose.yml pull aics-admin
-            echo "${{ secrets.SERVER_PASSWORD }}" | sudo -S docker-compose -f ${{ secrets.DOCKER_COMPOSE_YAML_PATH }}/docker-compose.yml pull aics-auth
+            set -euo pipefail
+            cd ${{ secrets.DOCKER_COMPOSE_YAML_PATH }}
 
-            echo "${{ secrets.SERVER_PASSWORD }}" | sudo -S docker-compose -f ${{ secrets.DOCKER_COMPOSE_YAML_PATH }}/docker-compose.yml --env-file ${{ secrets.ENVIRONMENT_PATH }} up -d aics-api
-            echo "${{ secrets.SERVER_PASSWORD }}" | sudo -S docker-compose -f ${{ secrets.DOCKER_COMPOSE_YAML_PATH }}/docker-compose.yml --env-file ${{ secrets.ENVIRONMENT_PATH }} up -d aics-admin
-            echo "${{ secrets.SERVER_PASSWORD }}" | sudo -S docker-compose -f ${{ secrets.DOCKER_COMPOSE_YAML_PATH }}/docker-compose.yml --env-file ${{ secrets.ENVIRONMENT_PATH }} up -d aics-auth
+            docker compose pull aics-api aics-admin aics-auth
+            docker compose --env-file ${{ secrets.ENVIRONMENT_PATH }} up -d aics-api aics-admin aics-auth
