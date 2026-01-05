@@ -15,7 +15,7 @@ public record ScheduleSummaryResponse(
     @Schema(description = "일정 id", example = "1", requiredMode = REQUIRED)
     Long id,
 
-    @Schema(description = "제출 유형", example = "MIDTHESIS", requiredMode = REQUIRED)
+    @Schema(description = "제출 유형", example = "중간논문", requiredMode = REQUIRED)
     String submissionType,
 
     @Schema(description = "시작일", example = "2025-05-01", requiredMode = REQUIRED)
@@ -26,7 +26,7 @@ public record ScheduleSummaryResponse(
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     String endDate,
 
-    @Schema(description = "상태(대기/진행/마감)", example = "IN_PROGRESS", requiredMode = REQUIRED)
+    @Schema(description = "상태(대기/진행/마감)", example = "진행 중", requiredMode = REQUIRED)
     String status
 ) {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -34,10 +34,10 @@ public record ScheduleSummaryResponse(
     public static ScheduleSummaryResponse from(Schedule schedule, LocalDateTime referenceTime) {
         return ScheduleSummaryResponse.builder()
                 .id(schedule.getId())
-                .submissionType(schedule.getSubmissionType().name())
+                .submissionType(schedule.getSubmissionType().getLabel())
                 .startDate(schedule.getStartDate().format(DATE_FORMATTER))
                 .endDate(schedule.getEndDate().format(DATE_FORMATTER))
-                .status(schedule.determineStatusAt(referenceTime).name())
+                .status(schedule.determineStatusAt(referenceTime).getLabel())
                 .build();
     }
 }
