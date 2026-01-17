@@ -4,16 +4,19 @@ import kgu.developers.domain.graduationUser.application.command.GraduationUserCo
 import kgu.developers.domain.graduationUser.domain.GraduationType;
 import kgu.developers.domain.graduationUser.domain.GraduationUser;
 import kgu.developers.domain.graduationUser.exception.GraduationUserIdDuplicateException;
+import kgu.developers.domain.schedule.application.query.ScheduleQueryService;
 import kgu.developers.domain.schedule.domain.Schedule;
 import kgu.developers.domain.schedule.domain.SubmissionType;
 import kgu.developers.domain.user.domain.User;
 import mock.repository.FakeGraduationUserRepository;
+import mock.repository.FakeScheduleRepository;
 import mock.repository.FakeUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -24,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class GraduationUserCommandServiceTest {
     private GraduationUserCommandService graduationUserCommandService;
     private FakeGraduationUserRepository fakeGraduationUserRepository;
+    private FakeScheduleRepository fakeScheduleRepository;
     private FakeUserRepository fakeUserRepository;
     private GraduationUser graduationUser;
 
@@ -37,15 +41,26 @@ public class GraduationUserCommandServiceTest {
 
     private void initializeGraduationUserCommandService() {
         fakeUserRepository = new FakeUserRepository();
+        fakeScheduleRepository = new FakeScheduleRepository();
         fakeGraduationUserRepository = new FakeGraduationUserRepository();
-        graduationUserCommandService = new GraduationUserCommandService(fakeGraduationUserRepository);
+        graduationUserCommandService = new GraduationUserCommandService(fakeGraduationUserRepository, new ScheduleQueryService(fakeScheduleRepository));
         saveTestUser();
+        saveTestSchedule();
         graduationUser = fakeGraduationUserRepository.save(saveTestGraduationuser());
     }
 
     private void saveTestUser() {
         fakeUserRepository.save(User.builder().id(TARGET_STUDENT_ID).build());
         fakeUserRepository.save(User.builder().id("202211444").build());
+    }
+
+    private void saveTestSchedule() {
+        fakeScheduleRepository.save(Schedule.create(
+            SubmissionType.SUBMITTED,
+            "졸업 방식 제출 일정",
+            LocalDateTime.of(2000, 1, 1,0,0),
+            LocalDateTime.of(3000, 1, 1,0,0)
+        ));
     }
 
     private GraduationUser saveTestGraduationuser() {
@@ -150,8 +165,8 @@ public class GraduationUserCommandServiceTest {
             .build();
 
         //when
-        graduationUserCommandService.updateThesis(graduationUser, midThesisId, midSchedule);
-        graduationUserCommandService.updateThesis(graduationUser, finalThesisId, finalSchedule);
+        graduationUserCommandService.updateThesis(graduationUser, midThesisId, SubmissionType.MIDTHESIS);
+        graduationUserCommandService.updateThesis(graduationUser, finalThesisId, SubmissionType.FINALTHESIS);
 
         //then
         assertEquals(graduationUser.getMidThesisId(), midThesisId);

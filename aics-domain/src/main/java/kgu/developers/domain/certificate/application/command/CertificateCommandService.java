@@ -2,7 +2,7 @@ package kgu.developers.domain.certificate.application.command;
 
 import kgu.developers.domain.certificate.domain.Certificate;
 import kgu.developers.domain.certificate.domain.CertificateRepository;
-import kgu.developers.domain.certificate.exception.CertificateInvalidGraduationTypeException;
+import kgu.developers.domain.certificate.exception.CertificateSubmissionTypeMismatchException;
 import kgu.developers.domain.certificate.exception.CertificateNotFoundException;
 import kgu.developers.domain.certificate.exception.CertificateNotInSubmissionPeriodException;
 import kgu.developers.domain.file.application.command.FileCommandService;
@@ -13,6 +13,7 @@ import kgu.developers.domain.graduationUser.domain.GraduationType;
 import kgu.developers.domain.graduationUser.domain.GraduationUser;
 import kgu.developers.domain.schedule.application.query.ScheduleQueryService;
 import kgu.developers.domain.schedule.domain.Schedule;
+import kgu.developers.domain.schedule.domain.SubmissionType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,13 +31,13 @@ public class CertificateCommandService {
 	private final ScheduleQueryService scheduleQueryService;
 	private final GraduationUserQueryService graduationUserQueryService;
 
-	public Long submitCertificate(MultipartFile file, Long scheduleId) {
-		Schedule schedule = scheduleQueryService.getScheduleManagement(scheduleId);
+	public Long submitCertificate(MultipartFile file) {
+		Schedule schedule = scheduleQueryService.getBySubmissionType(SubmissionType.CERTIFICATE);
 
 		GraduationUser graduationUser = graduationUserQueryService.me();
 
 		if(graduationUser.getGraduationType() != GraduationType.CERTIFICATE) {
-			throw new CertificateInvalidGraduationTypeException();
+			throw new CertificateSubmissionTypeMismatchException();
 		}
 
 		LocalDateTime referenceTime = LocalDateTime.now();
@@ -48,7 +49,7 @@ public class CertificateCommandService {
 		String storedPath = fileStorageService.store(file, FileDomain.CERTIFICATE);
 		Long fileId = fileCommandService.saveFile(file, storedPath).getId();
 
-		Certificate certificate = Certificate.create(scheduleId, fileId);
+		Certificate certificate = Certificate.create(schedule.getId(), fileId);
 		return certificateRepository.save(certificate);
 	}
 
